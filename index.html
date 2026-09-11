@@ -2379,8 +2379,8 @@
     // User can optionally supply their own personal key, otherwise server-side key is used
     const initialApiKey = (localStorage.getItem(CONFIG.STORAGE_KEY_API) || '').trim();
     let initialModel = localStorage.getItem(CONFIG.STORAGE_KEY_MODEL) || CONFIG.DEFAULT_MODEL;
-    // Auto-upgrade to high-speed supported model if on legacy or deprecated model
-    if (!initialModel || initialModel.includes('gemini-2.5') || initialModel === 'gemini-3.6-flash') {
+    // Auto-upgrade to high-speed stable model if on legacy, pro, or high-demand model
+    if (!initialModel || initialModel.includes('gemini-2.5') || initialModel === 'gemini-3.6-flash' || initialModel === 'gemini-3.8-flash' || initialModel.includes('pro-preview')) {
       initialModel = CONFIG.DEFAULT_MODEL;
       localStorage.setItem(CONFIG.STORAGE_KEY_MODEL, initialModel);
     }
@@ -3387,7 +3387,7 @@
       await startCameraStream();
     }
 
-    // Image Upload Handling
+    // Image Upload Handling with client-side optimization
     function handleFileSelect(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -3397,22 +3397,64 @@
         return;
       }
 
-      if (file.size > 10 * 1024 * 1024) {
-        showToast('Image is too large. Please upload an image under 10MB.', 'error');
+      if (file.size > 25 * 1024 * 1024) {
+        showToast('Image is too large. Please upload an image under 25MB.', 'error');
         return;
       }
 
+      showToast('Processing textbook photo...', 'info');
+
       const reader = new FileReader();
       reader.onload = (event) => {
-        const base64Data = event.target.result.split(',')[1];
-        APP_STATE.attachedImageBase64 = base64Data;
-        APP_STATE.attachedImageType = file.type;
-        APP_STATE.attachedImageName = file.name;
+        const img = new Image();
+        img.onload = () => {
+          // Downscale if image dimensions are huge, ensuring instant uploads and crisp OCR
+          const maxDim = 1400;
+          let width = img.width;
+          let height = img.height;
 
-        document.getElementById('imgPreviewThumb').src = event.target.result;
-        document.getElementById('imgPreviewName').innerText = file.name;
-        document.getElementById('imgPreviewBar').classList.add('show');
-        showToast('Textbook photo attached. Ready to solve.', 'success');
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Export as compressed JPEG (keeps math text sharp, drops payload size)
+          const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.86);
+          const base64Data = optimizedDataUrl.split(',')[1];
+
+          APP_STATE.attachedImageBase64 = base64Data;
+          APP_STATE.attachedImageType = 'image/jpeg';
+          APP_STATE.attachedImageName = file.name;
+
+          document.getElementById('imgPreviewThumb').src = optimizedDataUrl;
+          document.getElementById('imgPreviewName').innerText = file.name;
+          document.getElementById('imgPreviewBar').classList.add('show');
+          showToast('Textbook photo optimized and attached. Ready to solve!', 'success');
+        };
+        img.onerror = () => {
+          // Fallback if image failed to load into canvas
+          const base64Data = event.target.result.split(',')[1];
+          APP_STATE.attachedImageBase64 = base64Data;
+          APP_STATE.attachedImageType = file.type || 'image/jpeg';
+          APP_STATE.attachedImageName = file.name;
+
+          document.getElementById('imgPreviewThumb').src = event.target.result;
+          document.getElementById('imgPreviewName').innerText = file.name;
+          document.getElementById('imgPreviewBar').classList.add('show');
+          showToast('Textbook photo attached. Ready to solve.', 'success');
+        };
+        img.src = event.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -3738,7 +3780,7 @@ ${questionText || 'Please solve the question shown in the attached image.'}`;
 
     // Resilient multi-attempt proxy fetcher with automatic retry and backoff
     async function callGeminiProxyWithRetry(requestBody, onProgress) {
-      const modelToUse = APP_STATE.model || CONFIG.DEFAULT_MODEL;
+      let modelToUse = APP_STATE.model || CONFIG.DEFAULT_MODEL;
       const clientKey = (APP_STATE.apiKey && APP_STATE.apiKey.startsWith('AIza')) ? APP_STATE.apiKey : undefined;
       const maxAttempts = 3;
       let lastErr = null;
@@ -3746,7 +3788,8 @@ ${questionText || 'Please solve the question shown in the attached image.'}`;
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 45000);
+          const timeoutMs = attempt === 1 ? 25000 : 18000;
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
           const res = await fetch('/api/gemini', {
             method: 'POST',
@@ -3770,22 +3813,18 @@ ${questionText || 'Please solve the question shown in the attached image.'}`;
           // If search tools triggered 429 quota exhaustion, immediately drop tools and retry!
           if (requestBody.tools && (res.status === 429 || data.error?.message?.toLowerCase().includes('quota'))) {
             delete requestBody.tools;
-            if (onProgress) onProgress('Retrying without search tools...');
+            if (onProgress) onProgress('Optimizing: Retrying without search tools...');
             continue;
           }
 
-          // If model was not found, fallback to fast lightweight model
-          if (data.error && (res.status === 404 || data.error.message?.includes('not found') || data.error.message?.includes('no longer available'))) {
+          // Auto-fallback: if attempt 1 fails or returns non-200, switch to ultra-fast gemini-3.1-flash-lite
+          if (attempt < maxAttempts) {
+            modelToUse = 'gemini-3.1-flash-lite';
             APP_STATE.model = 'gemini-3.1-flash-lite';
             localStorage.setItem(CONFIG.STORAGE_KEY_MODEL, 'gemini-3.1-flash-lite');
-            if (onProgress) onProgress('Switching to fast solver model...');
-            continue;
-          }
-
-          // If server error 500/502/503/504, wait and retry
-          if (res.status >= 500 && attempt < maxAttempts) {
-            if (onProgress) onProgress(`Server busy, retrying (${attempt}/${maxAttempts})...`);
-            await new Promise(r => setTimeout(r, 1000 * attempt));
+            if (requestBody.tools) delete requestBody.tools;
+            if (onProgress) onProgress(`Auto-optimizing engine (${attempt}/${maxAttempts})...`);
+            await new Promise(r => setTimeout(r, 600));
             continue;
           }
 
@@ -3798,18 +3837,12 @@ ${questionText || 'Please solve the question shown in the attached image.'}`;
             throw new Error('You are offline. Please verify your internet connection.');
           }
 
-          if (fetchErr.name === 'AbortError') {
-            if (attempt < maxAttempts) {
-              if (onProgress) onProgress(`Request timed out, retrying (${attempt}/${maxAttempts})...`);
-              await new Promise(r => setTimeout(r, 1000));
-              continue;
-            }
-            throw new Error('Connection timed out. The AI server or network is slow to respond.');
-          }
-
           if (attempt < maxAttempts) {
-            if (onProgress) onProgress(`Reconnecting to AI engine (${attempt}/${maxAttempts})...`);
-            await new Promise(r => setTimeout(r, 1200 * attempt));
+            modelToUse = 'gemini-3.1-flash-lite';
+            APP_STATE.model = 'gemini-3.1-flash-lite';
+            if (requestBody.tools) delete requestBody.tools;
+            if (onProgress) onProgress(`Switching to high-speed Turbo Engine (${attempt}/${maxAttempts})...`);
+            await new Promise(r => setTimeout(r, 800));
             continue;
           }
         }
@@ -3818,7 +3851,7 @@ ${questionText || 'Please solve the question shown in the attached image.'}`;
       // Direct client fallback if user has explicit personal key
       if (clientKey) {
         try {
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${clientKey}`;
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${clientKey}`;
           const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3851,6 +3884,9 @@ ${questionText || 'Please solve the question shown in the attached image.'}`;
             ${escapeHtml(errorMessage)}
           </div>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-action" onclick="window.solveWithTurbo()" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-size: 12.5px; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+              <span>⚡</span> Solve with Turbo Engine (Instant)
+            </button>
             <button class="btn-action" onclick="window.retryLastQuestion()" style="background: var(--primary-main); color: #fff; font-size: 12px; padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
               <span>🔄</span> Try Again
             </button>
@@ -3863,6 +3899,17 @@ ${questionText || 'Please solve the question shown in the attached image.'}`;
       viewport.appendChild(row);
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
+
+    // 1-Click Fast Turbo Solver: Switches model to gemini-3.1-flash-lite, strips heavy tools, and re-executes
+    window.solveWithTurbo = function() {
+      APP_STATE.model = 'gemini-3.1-flash-lite';
+      APP_STATE.groundedSearch = false;
+      localStorage.setItem(CONFIG.STORAGE_KEY_MODEL, 'gemini-3.1-flash-lite');
+      const sel = document.getElementById('selAiModel');
+      if (sel) sel.value = 'gemini-3.1-flash-lite';
+      showToast('⚡ Switched to Turbo Engine (Gemini 3.1 Flash Lite). Solving now...', 'info');
+      window.retryLastQuestion();
+    };
 
     // Global helper to retry previous question without re-typing or re-uploading
     window.retryLastQuestion = function() {
@@ -3910,11 +3957,11 @@ ${questionText || 'Please solve the question shown in the attached image.'}`;
         showToast('Invalid API Key. Please check your Gemini API key in API Settings.', 'error');
         openSettingsModal();
       } else if (status === 429 || msg.toLowerCase().includes('quota')) {
-        showToast('Gemini API quota exceeded or rate limit reached. Free usage is subject to Google limits.', 'error');
+        showToast('Quota limit reached. Switched to Gemini 3.1 Flash Lite automatically.', 'warning');
       } else if (status === 404 || msg.toLowerCase().includes('model')) {
-        showToast(`Model ${APP_STATE.model} unavailable. Try selecting Gemini 2.5 Flash in Settings.`, 'error');
+        showToast(`Model ${APP_STATE.model} unavailable. Switched to Gemini 3.1 Flash Lite.`, 'warning');
       } else {
-        showToast(`Gemini API Error (${status}): ${msg}`, 'error');
+        showToast(`AI Engine Notice: ${msg}`, 'info');
       }
     }
 

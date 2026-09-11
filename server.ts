@@ -62,17 +62,34 @@ app.post('/api/test-key', async (req, res) => {
       },
     });
 
-    const testModel = req.body?.model || 'gemini-3.1-flash-lite';
-    const response = await ai.models.generateContent({
-      model: testModel,
-      contents: 'Respond with OK',
-    });
+    const preferredModel = req.body?.model || 'gemini-3.1-flash-lite';
+    let response: any = null;
+    let usedModel = preferredModel;
 
+    // Try preferred model, fallback to gemini-3.1-flash-lite if high demand (503) or quota limit (429)
+    try {
+      response = await Promise.race([
+        ai.models.generateContent({
+          model: preferredModel,
+          contents: 'Respond with OK',
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Model check timed out')), 4000)),
+      ]);
+    } catch (prefErr: any) {
+      console.warn(`Test key with ${preferredModel} failed, trying gemini-3.1-flash-lite:`, prefErr.message);
+      usedModel = 'gemini-3.1-flash-lite';
+      response = await ai.models.generateContent({
+        model: 'gemini-3.1-flash-lite',
+        contents: 'Respond with OK',
+      });
+    }
+
+    const resText = response?.text || 'OK';
     res.json({
       valid: true,
-      candidates: [{ content: { parts: [{ text: response.text || 'OK' }] } }],
-      modelUsed: testModel,
-      text: response.text || 'OK',
+      candidates: [{ content: { parts: [{ text: resText }] } }],
+      modelUsed: usedModel,
+      text: resText,
     });
   } catch (err: any) {
     console.error('Test key error:', err);
@@ -108,14 +125,12 @@ app.post('/api/gemini', async (req, res) => {
       },
     });
 
-    // Models priority cascade: requested -> gemini-3.1-flash-lite -> gemini-3.8-flash
-    const primaryModel = model && !model.includes('gemini-2.5') ? model : 'gemini-3.1-flash-lite';
-    const modelsToTry = [
-      primaryModel,
-      'gemini-3.1-flash-lite',
-      'gemini-3.8-flash',
-    ];
-    const uniqueModels = [...new Set(modelsToTry)];
+    // Models priority cascade: always prioritize ultra-fast gemini-3.1-flash-lite
+    const requested = (model && !model.includes('gemini-2.5')) ? model : 'gemini-3.1-flash-lite';
+    // If requested model is already flash-lite, test it first; otherwise test requested with short timeout then flash-lite
+    const modelsToTry = requested === 'gemini-3.1-flash-lite'
+      ? ['gemini-3.1-flash-lite']
+      : [requested, 'gemini-3.1-flash-lite'];
 
     // Convert REST-style contents and systemInstruction to SDK parameters
     const userParts: any[] = [];
@@ -153,8 +168,8 @@ app.post('/api/gemini', async (req, res) => {
 
     let lastError: any = null;
 
-    // Helper function to try generating content with or without tools
-    const tryGenerateWithModel = async (m: string, includeTools: boolean) => {
+    // Helper function to try generating content with or without tools and with timeout
+    const tryGenerateWithModel = async (m: string, includeTools: boolean, timeoutMs: number) => {
       const config: any = {
         systemInstruction: systemInstructionText,
         temperature: temp,
@@ -165,17 +180,37 @@ app.post('/api/gemini', async (req, res) => {
         config.tools = payload.tools;
       }
 
-      return await ai.models.generateContent({
+      const callPromise = ai.models.generateContent({
         model: m,
         contents: userParts.length > 0 ? userParts : 'Solve this question step by step.',
         config,
       });
+
+      return await Promise.race([
+        callPromise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(`Model ${m} timed out after ${timeoutMs}ms`)), timeoutMs)
+        ),
+      ]);
     };
 
-    for (const m of uniqueModels) {
+    // Helper to safely extract generated output text
+    const extractText = (resp: any): string => {
+      let txt = '';
       try {
-        let response = await tryGenerateWithModel(m, true);
-        const outputText = response.text || '';
+        txt = resp?.text || '';
+      } catch (_) {}
+      if (!txt && resp?.candidates?.[0]?.content?.parts) {
+        txt = resp.candidates[0].content.parts.map((p: any) => p.text || '').filter(Boolean).join('\n');
+      }
+      return txt;
+    };
+
+    for (const m of modelsToTry) {
+      const timeoutForModel = m === 'gemini-3.1-flash-lite' ? 22000 : 3500;
+      try {
+        const response = await tryGenerateWithModel(m, true, timeoutForModel);
+        const outputText = extractText(response);
         if (outputText) {
           res.json({
             candidates: [
@@ -195,12 +230,13 @@ app.post('/api/gemini', async (req, res) => {
       } catch (callErr: any) {
         console.warn(`Model attempt ${m} with tools failed:`, callErr.message);
         lastError = callErr;
+
         // If error might be due to tools (such as quota 429 on Search Grounding or tool error), retry without tools
         if (payload.tools && payload.tools.length > 0) {
           try {
             console.log(`Retrying model ${m} without tools...`);
-            const fallbackResponse = await tryGenerateWithModel(m, false);
-            const outputText = fallbackResponse.text || '';
+            const fallbackResponse = await tryGenerateWithModel(m, false, timeoutForModel);
+            const outputText = extractText(fallbackResponse);
             if (outputText) {
               res.json({
                 candidates: [
@@ -226,7 +262,8 @@ app.post('/api/gemini', async (req, res) => {
     }
 
     // Fallback: If SDK attempts hit specific limits, try direct fetch with key
-    for (const m of uniqueModels) {
+    const restModels = ['gemini-3.1-flash-lite'];
+    for (const m of restModels) {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`;
         // Try with payload as-is
