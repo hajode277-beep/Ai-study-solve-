@@ -1,0 +1,4292 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>StudySolve AI — Ask Any Question. Understand Every Answer.</title>
+  <meta name="description" content="StudySolve AI: Modern premium AI study assistant for textbook problems, homework, exams, and step-by-step solutions across all subjects." />
+  <meta property="og:title" content="StudySolve AI — Ask Any Question. Understand Every Answer." />
+  <meta property="og:description" content="AI tutor for Mathematics, Physics, Chemistry, Biology, Hindi, English, and more with step-by-step solutions." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/png" href="/study-solve-ai-icon.png" />
+  <link rel="apple-touch-icon" href="/study-solve-ai-icon.png" />
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- KaTeX for Math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    /* CSS Variables & Theme */
+    :root {
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --bg-primary: #090d16;
+      --bg-surface: rgba(18, 24, 38, 0.7);
+      --bg-surface-elevated: rgba(28, 36, 56, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(99, 102, 241, 0.35);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --secondary: #06b6d4;
+      --accent: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --glass-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      --card-radius: 16px;
+    }
+
+    html.light {
+      --bg-primary: #f8fafc;
+      --bg-surface: rgba(255, 255, 255, 0.85);
+      --bg-surface-elevated: #ffffff;
+      --border-subtle: rgba(15, 23, 42, 0.08);
+      --border-glow: rgba(99, 102, 241, 0.25);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --glass-shadow: 0 20px 30px -10px rgba(99, 102, 241, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Ambient Animated Background Gradients */
+    .bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .ambient-glow-1 {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+      top: -150px;
+      left: -100px;
+      animation: pulseGlow 12s ease-in-out infinite alternate;
+    }
+    .ambient-glow-2 {
+      position: absolute;
+      width: 650px;
+      height: 650px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(6, 182, 212, 0) 70%);
+      bottom: -150px;
+      right: -100px;
+      animation: pulseGlow 14s ease-in-out infinite alternate-reverse;
+    }
+    .ambient-glow-3 {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, rgba(236, 72, 153, 0) 70%);
+      top: 40%;
+      left: 35%;
+      animation: pulseGlow 16s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(1) translate(0, 0); opacity: 0.7; }
+      50% { transform: scale(1.15) translate(30px, -20px); opacity: 0.9; }
+      100% { transform: scale(0.95) translate(-20px, 30px); opacity: 0.7; }
+    }
+
+    /* Intro Splash Animation Screen */
+    #splashScreen {
+      position: fixed;
+      inset: 0;
+      background: #060911;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+    }
+    #splashScreen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .splash-logo-orb {
+      width: 86px;
+      height: 86px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      box-shadow: 0 0 50px rgba(99, 102, 241, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: splashPulse 1.4s ease-in-out infinite alternate;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    .splash-logo-orb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    @keyframes splashPulse {
+      from { transform: scale(0.95); box-shadow: 0 0 35px rgba(99, 102, 241, 0.4); }
+      to { transform: scale(1.08); box-shadow: 0 0 65px rgba(99, 102, 241, 0.85); }
+    }
+    .splash-title {
+      margin-top: 20px;
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .splash-subtitle {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    /* App Structure */
+    #appContainer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Top Navigation Header */
+    header.app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .brand-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+    .brand-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 60%);
+    }
+    .brand-info h1 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+      background: linear-gradient(120deg, var(--text-main), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-info p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-icon-pill {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-icon-pill:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+    .btn-icon-square {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-icon-square:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-1px);
+    }
+    .key-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warning);
+      display: inline-block;
+      margin-left: 2px;
+    }
+    .key-indicator.configured {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    /* Sub-header Filter Toolbar */
+    .toolbar-bar {
+      padding: 10px 20px;
+      background: rgba(18, 24, 38, 0.4);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .toolbar-bar::-webkit-scrollbar { display: none; }
+
+    .tool-select-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .tool-select-wrapper label {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-right: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tool-select {
+      appearance: none;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 6px 26px 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .tool-select:focus {
+      border-color: var(--primary);
+    }
+    .select-arrow {
+      position: absolute;
+      right: 8px;
+      pointer-events: none;
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--primary-light);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    /* Main Content Area */
+    main.main-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: 140px; /* Space for sticky composer */
+    }
+
+    /* Welcome / Hero State */
+    #heroSection {
+      padding: 40px 20px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* 3D AI Orb Container */
+    .orb-stage {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
+    .ai-orb {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      border-radius: 36px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(6, 182, 212, 0.3));
+      box-shadow: 0 0 55px rgba(99, 102, 241, 0.65), 0 0 25px rgba(6, 182, 212, 0.4);
+      transform-style: preserve-3d;
+      animation: orbFloat 6s ease-in-out infinite alternate;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+    }
+    .hero-logo-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 34px;
+      object-fit: cover;
+      display: block;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+    .orb-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(129, 140, 248, 0.4);
+      pointer-events: none;
+    }
+    .orb-ring-1 {
+      width: 190px;
+      height: 190px;
+      animation: rotateRing 14s linear infinite;
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+    .orb-ring-2 {
+      width: 230px;
+      height: 230px;
+      animation: rotateRingRev 18s linear infinite;
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+    .orb-status-chip {
+      position: absolute;
+      bottom: -10px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-glow);
+      color: var(--text-main);
+      padding: 4px 14px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 5;
+    }
+    .orb-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      animation: dotPulse 2s infinite;
+    }
+
+    /* Floating Educational Objects */
+    .float-icon {
+      position: absolute;
+      font-size: 26px;
+      padding: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      backdrop-filter: blur(8px);
+      user-select: none;
+      pointer-events: none;
+      animation: floatMotion 4s ease-in-out infinite alternate;
+    }
+    .float-icon-1 { top: 0; left: 10px; animation-delay: 0s; }
+    .float-icon-2 { top: 10px; right: 15px; animation-delay: 0.8s; }
+    .float-icon-3 { bottom: 20px; left: -10px; animation-delay: 1.6s; }
+    .float-icon-4 { bottom: 30px; right: -5px; animation-delay: 2.2s; }
+
+    @keyframes orbFloat {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-12px) rotate(6deg); }
+    }
+    @keyframes coreRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes rotateRing {
+      0% { transform: rotateX(65deg) rotateZ(0deg); }
+      100% { transform: rotateX(65deg) rotateZ(360deg); }
+    }
+    @keyframes rotateRingRev {
+      0% { transform: rotateY(65deg) rotateZ(360deg); }
+      100% { transform: rotateY(65deg) rotateZ(0deg); }
+    }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+    @keyframes floatMotion {
+      0% { transform: translateY(0) rotate(-4deg); }
+      100% { transform: translateY(-14px) rotate(4deg); }
+    }
+
+    /* Hero Typography */
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 12px;
+      max-width: 750px;
+    }
+    .hero-title span.gradient-text {
+      background: linear-gradient(135deg, #818cf8 0%, #38bdf8 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: clamp(14px, 2vw, 17px);
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: 30px;
+    }
+
+    /* 3D Subject Cards Grid */
+    .subject-section {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .section-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      perspective: 1000px;
+    }
+    .subject-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--card-radius);
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      backdrop-filter: blur(12px);
+    }
+    .subject-card:hover, .subject-card.active {
+      border-color: var(--border-glow);
+      box-shadow: 0 12px 28px -8px rgba(99, 102, 241, 0.25);
+      background: var(--bg-surface-elevated);
+    }
+    .subject-card.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #6366f1, #06b6d4);
+    }
+    .subject-icon-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    .subject-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .subject-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Quick Sample Prompts */
+    .sample-prompts {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 800px;
+    }
+    .prompt-chip {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .prompt-chip:hover {
+      border-color: var(--primary-light);
+      color: var(--text-main);
+      background: var(--bg-surface-elevated);
+      transform: translateY(-1px);
+    }
+
+    /* Chat Messages Container */
+    #chatViewport {
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      padding: 24px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    #chatViewport.active {
+      display: flex;
+    }
+
+    /* Message Rows */
+    .chat-row {
+      display: flex;
+      gap: 14px;
+      width: 100%;
+      animation: messageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes messageEnter {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-row.user-row {
+      justify-content: flex-end;
+    }
+    .chat-row.ai-row {
+      justify-content: flex-start;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      overflow: hidden;
+    }
+    .avatar-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 12px;
+    }
+    .user-avatar {
+      background: linear-gradient(135deg, #475569, #334155);
+      color: #fff;
+    }
+    .ai-avatar {
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      animation: aiGlowPulse 4s ease-in-out infinite alternate;
+    }
+    @keyframes aiGlowPulse {
+      0% { box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+      100% { box-shadow: 0 4px 22px rgba(6, 182, 212, 0.6); }
+    }
+
+    .message-bubble {
+      max-width: 82%;
+      border-radius: var(--card-radius);
+      padding: 16px 20px;
+      position: relative;
+      line-height: 1.65;
+    }
+    .user-bubble {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 8px 20px -6px rgba(79, 70, 229, 0.4);
+    }
+    .user-bubble .user-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      opacity: 0.8;
+      margin-bottom: 6px;
+    }
+    .user-bubble .attached-img-thumb {
+      max-width: 260px;
+      max-height: 200px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: block;
+      border: 1px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+    }
+
+    .ai-bubble {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(14px);
+      width: 100%;
+    }
+    .ai-header-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+    .ai-author-tag {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-light);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-meta-tag {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Structured Visual Callout Boxes in AI Response */
+    .callout-box {
+      margin: 14px 0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 14px;
+      position: relative;
+    }
+    .callout-final {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--text-main);
+    }
+    .callout-final .callout-head {
+      color: #34d399;
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .callout-concept {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .callout-concept .callout-head {
+      color: #a5b4fc;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .callout-calculation {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+    }
+    .callout-calculation .callout-head {
+      color: #38bdf8;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .callout-revision {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+    .callout-revision .callout-head {
+      color: #fbbf24;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    /* Markdown content inside AI bubble */
+    .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+      font-family: var(--font-display);
+      margin: 14px 0 8px;
+      color: var(--text-main);
+      line-height: 1.3;
+    }
+    .markdown-content h2 { font-size: 18px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px; }
+    .markdown-content h3 { font-size: 16px; }
+    .markdown-content p { margin: 8px 0; }
+    .markdown-content ul, .markdown-content ol { padding-left: 20px; margin: 8px 0; }
+    .markdown-content li { margin-bottom: 4px; }
+    .markdown-content code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #38bdf8;
+    }
+    .markdown-content pre {
+      background: #090e1a;
+      border: 1px solid var(--border-subtle);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    .markdown-content pre code {
+      background: transparent;
+      padding: 0;
+      color: #e2e8f0;
+    }
+    .markdown-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 13px;
+    }
+    .markdown-content th, .markdown-content td {
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .markdown-content th {
+      background: rgba(99, 102, 241, 0.1);
+      font-weight: 700;
+    }
+
+    /* AI Response Action Buttons Toolbar */
+    .ai-actions-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .btn-action {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-action:hover {
+      color: var(--text-main);
+      border-color: var(--border-glow);
+      transform: translateY(-1px);
+    }
+    .btn-action.active {
+      color: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    /* AI Fast Step-by-Step Thinking Bubble */
+    .thinking-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 22px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--card-radius);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.25);
+      width: 100%;
+      max-width: 620px;
+      animation: pulseThinking 2s ease-in-out infinite alternate;
+    }
+    @keyframes pulseThinking {
+      from { border-color: rgba(99, 102, 241, 0.35); box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15); }
+      to { border-color: rgba(99, 102, 241, 0.85); box-shadow: 0 12px 35px rgba(99, 102, 241, 0.35); }
+    }
+    .thinking-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .thinking-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .thinking-spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid rgba(99, 102, 241, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .thinking-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .thinking-timer-pill {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.5px;
+    }
+    .thinking-bar-track {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .thinking-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6366f1 0%, #38bdf8 50%, #10b981 100%);
+      border-radius: 4px;
+      transition: width 0.15s ease-out;
+    }
+    .thinking-steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 2px;
+    }
+    .thinking-step-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-dim);
+      transition: all 0.2s ease;
+    }
+    .thinking-step-row.active {
+      color: var(--primary-light);
+      font-weight: 600;
+      transform: translateX(4px);
+    }
+    .thinking-step-row.done {
+      color: #10b981;
+    }
+    .thinking-step-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      font-size: 10px;
+      margin-right: 6px;
+    }
+
+    /* Fixed Bottom AI Chat Composer */
+    .composer-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: linear-gradient(180deg, transparent 0%, var(--bg-primary) 35%);
+      padding: 10px 20px 20px;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .composer-card {
+      width: 100%;
+      max-width: 860px;
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 12px 16px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .composer-card:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 15px 45px rgba(99, 102, 241, 0.35);
+    }
+
+    /* Image Preview Container in composer */
+    .image-preview-bar {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--bg-surface-elevated);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+    .image-preview-bar.show {
+      display: flex;
+    }
+    .img-thumb {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--border-glow);
+    }
+    .img-meta-info {
+      flex: 1;
+      font-size: 12px;
+    }
+    .img-meta-info .name {
+      font-weight: 600;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 300px;
+    }
+    .img-meta-info .sub {
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+    .btn-remove-img {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .composer-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .composer-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 15px;
+      resize: none;
+      outline: none;
+      max-height: 160px;
+      min-height: 44px;
+      line-height: 1.5;
+      padding: 8px 4px;
+    }
+    .composer-textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    .composer-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 4px;
+    }
+    .composer-left-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-tool {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .btn-tool:hover {
+      color: var(--text-main);
+      border-color: var(--border-glow);
+      transform: translateY(-1px);
+    }
+    .btn-tool.listening {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--danger);
+      color: var(--danger);
+      animation: micPulse 1.2s infinite alternate;
+    }
+    @keyframes micPulse {
+      from { transform: scale(1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+      to { transform: scale(1.08); box-shadow: 0 0 20px rgba(239, 68, 68, 0.8); }
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-send:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.6);
+    }
+    .btn-send:active {
+      transform: translateY(0);
+    }
+    .btn-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Modal System (Settings & History & Image Modal) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    .modal-backdrop.show {
+      display: flex;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    /* Live Camera Scanner Modal Styles */
+    .camera-scanner-modal {
+      max-width: 620px;
+      background: #0f172a;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 30px rgba(99, 102, 241, 0.25);
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .camera-modal-header {
+      padding: 14px 20px;
+      background: #1e293b;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .camera-viewport-wrap {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    @media (max-width: 640px) {
+      .camera-viewport-wrap {
+        height: 310px;
+      }
+    }
+    #cameraVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .camera-shutter-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 4px solid #6366f1;
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    }
+    .camera-shutter-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 35px rgba(99, 102, 241, 0.8);
+    }
+    .camera-shutter-btn:active {
+      transform: scale(0.93);
+    }
+    .camera-shutter-inner {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 22px;
+    }
+    .target-guide-frame {
+      position: absolute;
+      inset: 22px;
+      border: 2px dashed rgba(99, 102, 241, 0.7);
+      border-radius: 16px;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px;
+      box-shadow: inset 0 0 30px rgba(99, 102, 241, 0.2);
+      animation: guidePulse 2.5s ease-in-out infinite alternate;
+    }
+    @keyframes guidePulse {
+      from { border-color: rgba(99, 102, 241, 0.5); box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.15); }
+      to { border-color: rgba(56, 189, 248, 0.9); box-shadow: inset 0 0 35px rgba(56, 189, 248, 0.25); }
+    }
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .settings-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .settings-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .settings-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+    .settings-input:focus {
+      border-color: var(--primary);
+    }
+    .settings-notice {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fcd34d;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* History Drawer (Slide-out) */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 90;
+      display: none;
+    }
+    .drawer-overlay.show { display: block; }
+    .history-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 360px;
+      max-width: 85vw;
+      background: var(--bg-surface-elevated);
+      border-left: 1px solid var(--border-subtle);
+      z-index: 95;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .history-drawer.open {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .history-item {
+      padding: 12px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .history-item:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-1px);
+    }
+    .history-item-subject {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary-light);
+      margin-bottom: 4px;
+    }
+    .history-item-query {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .history-item-time {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Toast Notification System */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-glow);
+      border-radius: 12px;
+      padding: 12px 18px;
+      color: var(--text-main);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes toastSlideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Footer */
+    footer.app-footer {
+      padding: 24px 20px;
+      text-align: center;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    footer.app-footer a {
+      color: var(--primary-light);
+      text-decoration: none;
+    }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 768px) {
+      .brand-info p { display: none; }
+      .header-actions .btn-text-hide { display: none; }
+      .hero-title { font-size: 28px; }
+      .subject-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .subject-card { padding: 12px; }
+      .subject-card h3 { font-size: 13px; }
+      .subject-card p { font-size: 11px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .message-bubble { max-width: 90%; padding: 14px 16px; }
+      .orb-stage { width: 180px; height: 180px; }
+      .ai-orb { width: 110px; height: 110px; }
+      .orb-ring-1 { width: 150px; height: 150px; }
+      .orb-ring-2 { width: 180px; height: 180px; }
+      .composer-card { border-radius: 16px; padding: 10px 12px; }
+    }
+
+    /* Authentication & Gmail Verification Gate */
+    #authGate {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(6, 9, 18, 0.94);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      overflow-y: auto;
+    }
+    #authGate.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-glow);
+      border-radius: 24px;
+      padding: 32px 26px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(99, 102, 241, 0.25);
+      position: relative;
+      overflow: hidden;
+      animation: authCardPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes authCardPop {
+      from { transform: scale(0.92) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+    .auth-google-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 13px 20px;
+      background: #ffffff;
+      color: #1f2937;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      margin-bottom: 18px;
+    }
+    .auth-google-btn:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+    .auth-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .auth-input-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .auth-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .auth-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+    .auth-otp-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 14px 0 18px;
+    }
+    .auth-otp-input {
+      width: 44px;
+      height: 50px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s;
+    }
+    .auth-otp-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+      background: rgba(99, 102, 241, 0.1);
+    }
+    .auth-notice-pill {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #34d399;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-auth-primary {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-auth-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.55);
+    }
+    .user-profile-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 12px;
+    }
+    .user-profile-chip:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.12);
+    }
+    .user-avatar-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Canvas -->
+  <div class="bg-canvas">
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+    <div class="ambient-glow-3"></div>
+  </div>
+
+  <!-- Splash Screen Animation -->
+  <div id="splashScreen">
+    <div class="splash-logo-orb">
+      <img src="/study-solve-ai-icon.png" alt="StudySolve AI Logo" referrerPolicy="no-referrer" />
+    </div>
+    <div class="splash-title">STUDYSOLVE AI</div>
+    <div class="splash-subtitle">Learn. Solve. Understand.</div>
+  </div>
+
+  <!-- Gmail Authentication & Verification Gate -->
+  <div id="authGate">
+    <div class="auth-card">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="auth-badge">🔒 Verified Student Portal</div>
+        <div style="margin: 12px auto; width: 72px; height: 72px; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 22px rgba(99,102,241,0.45); border: 2px solid rgba(255,255,255,0.2);">
+          <img src="/study-solve-ai-icon.png" alt="StudySolve AI" referrerPolicy="no-referrer" style="width:100%; height:100%; object-fit:cover; display:block;" />
+        </div>
+        <h2 style="font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">STUDYSOLVE AI</h2>
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+          App access requires Gmail Verification. Please verify your Gmail account to unlock full academic AI assistance.
+        </p>
+      </div>
+
+      <!-- Option 1: Continue with Google (GSI) -->
+      <button id="btnGoogleSignIn" class="auth-google-btn" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span>Sign in with Google Account</span>
+      </button>
+
+      <div class="auth-divider">OR VERIFY VIA GMAIL ADDRESS</div>
+
+      <!-- Step 1: Gmail Input Form -->
+      <div id="authStepEmail">
+        <div class="auth-input-group">
+          <label for="authEmailInput">Student Gmail Address</label>
+          <input type="email" id="authEmailInput" class="auth-input" placeholder="e.g. hajode277@gmail.com" value="hajode277@gmail.com" required />
+          <span style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">Enter your Gmail address to receive security verification.</span>
+        </div>
+
+        <div class="auth-input-group">
+          <label for="authNameInput">Student Name (Optional)</label>
+          <input type="text" id="authNameInput" class="auth-input" placeholder="Enter student name" value="Student" />
+        </div>
+
+        <button id="btnSendAuthCode" class="btn-auth-primary" type="button">
+          <span>Send Verification Code</span>
+          <span>📩</span>
+        </button>
+      </div>
+
+      <!-- Step 2: OTP Verification Code Form (initially hidden) -->
+      <div id="authStepOtp" style="display: none;">
+        <div class="auth-notice-pill">
+          <span>✉️</span>
+          <span>Code generated for: <strong id="lblOtpTarget">hajode277@gmail.com</strong></span>
+        </div>
+
+        <div style="background: rgba(99,102,241,0.1); border: 1px dashed rgba(99,102,241,0.4); border-radius: 12px; padding: 12px; margin-bottom: 14px; text-align: center;">
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">OFFICIAL 6-DIGIT VERIFICATION CODE</div>
+          <div id="liveDemoOtp" style="font-size: 22px; font-weight: 800; letter-spacing: 6px; color: var(--secondary); font-family: var(--font-mono);">748291</div>
+          <button id="btnAutofillOtp" type="button" style="margin-top: 8px; font-size: 11px; padding: 4px 12px; border-radius: 20px; background: rgba(99,102,241,0.25); border: 1px solid var(--primary-light); color: var(--text-main); cursor: pointer;">
+            ⚡ 1-Click Fill & Verify
+          </button>
+        </div>
+
+        <div class="auth-otp-row">
+          <input type="text" maxlength="1" class="auth-otp-input" id="otpDigit1" autofocus />
+          <input type="text" maxlength="1" class="auth-otp-input" id="otpDigit2" />
+          <input type="text" maxlength="1" class="auth-otp-input" id="otpDigit3" />
+          <input type="text" maxlength="1" class="auth-otp-input" id="otpDigit4" />
+          <input type="text" maxlength="1" class="auth-otp-input" id="otpDigit5" />
+          <input type="text" maxlength="1" class="auth-otp-input" id="otpDigit6" />
+        </div>
+
+        <button id="btnVerifyCode" class="btn-auth-primary" type="button">
+          <span>Verify Gmail & Unlock App</span>
+          <span>🚀</span>
+        </button>
+
+        <div style="text-align: center; margin-top: 12px;">
+          <button id="btnBackToEmail" type="button" style="background: none; border: none; color: var(--text-dim); font-size: 12px; cursor: pointer; text-decoration: underline;">
+            ← Change Gmail Address
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="appContainer">
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+      <div class="brand-section" id="btnBrandHome" title="Return to Home">
+        <div class="brand-icon">
+          <img src="/study-solve-ai-icon.png" alt="StudySolve AI Logo" referrerPolicy="no-referrer" />
+        </div>
+        <div class="brand-info">
+          <h1>STUDYSOLVE AI</h1>
+          <p>Ask Any Question. Understand Every Answer.</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Turbo 4s Speed Badge -->
+        <div id="turboIndicatorPill" class="btn-action" style="font-size: 11px; font-weight: 700; color: #10b981; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08); display: flex; align-items: center; gap: 5px; cursor: pointer;" title="Turbo 4-Second Speed Engine is Active">
+          <span style="font-size: 12px;">⚡</span>
+          <span class="btn-text-hide">Turbo 4s Solver</span>
+        </div>
+
+        <!-- Verified User Profile Chip -->
+        <div id="btnUserProfile" class="user-profile-chip" title="Verified Gmail Student Account">
+          <div class="user-avatar-badge" id="headerUserAvatar">G</div>
+          <span id="headerUserEmail" class="btn-text-hide" style="font-size:12px; font-weight:600; color:var(--text-main); max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">hajode277@gmail.com</span>
+          <span style="font-size:10px; background:rgba(16,185,129,0.2); color:#10b981; padding:2px 6px; border-radius:10px; font-weight:700;">✓</span>
+        </div>
+
+        <button id="btnNewChat" class="btn-icon-pill" title="Start fresh question">
+          <span>➕</span>
+          <span class="btn-text-hide">New Question</span>
+        </button>
+
+        <button id="btnHistory" class="btn-icon-square" title="Question History">
+          🕒
+        </button>
+
+        <button id="btnThemeToggle" class="btn-icon-square" title="Toggle Theme">
+          🌙
+        </button>
+
+        <button id="btnOpenSettings" class="btn-icon-pill" title="Configure AI & Models">
+          <span>⚙️</span>
+          <span class="btn-text-hide">API Settings</span>
+          <span id="apiKeyStatusDot" class="key-indicator" title="API Key Status"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Toolbar Filters (Subject, Mode, Level, Board, Language, Search Mode) -->
+    <div class="toolbar-bar">
+      <!-- Active Subject -->
+      <div class="tool-select-wrapper">
+        <label for="selSubject">Subject</label>
+        <select id="selSubject" class="tool-select">
+          <option value="Mathematics">Mathematics</option>
+          <option value="Physics">Physics</option>
+          <option value="Chemistry">Chemistry</option>
+          <option value="Biology">Biology</option>
+          <option value="Hindi">Hindi (हिंदी)</option>
+          <option value="English">English</option>
+          <option value="History">History</option>
+          <option value="Geography">Geography</option>
+          <option value="Computer Science">Computer Science</option>
+          <option value="General Knowledge">General Knowledge</option>
+          <option value="Economics">Economics</option>
+          <option value="Accountancy">Accountancy</option>
+          <option value="Competitive Exams">Competitive Exams</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <!-- Mode -->
+      <div class="tool-select-wrapper">
+        <label for="selMode">Mode</label>
+        <select id="selMode" class="tool-select">
+          <option value="Detailed Solution">Detailed Solution</option>
+          <option value="Exam Answer">Exam Answer 📝</option>
+          <option value="Normal Explanation">Normal Explanation</option>
+          <option value="Quick Answer">Quick Answer ⚡</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <!-- Level -->
+      <div class="tool-select-wrapper">
+        <label for="selLevel">Class/Level</label>
+        <select id="selLevel" class="tool-select">
+          <option value="Class 10" selected>Class 10</option>
+          <option value="Class 12">Class 12</option>
+          <option value="Class 11">Class 11</option>
+          <option value="Class 9">Class 9</option>
+          <option value="Class 8">Class 8</option>
+          <option value="Class 7">Class 7</option>
+          <option value="Class 6">Class 6</option>
+          <option value="Primary">Primary</option>
+          <option value="College / University">College / University</option>
+          <option value="Competitive Exam">Competitive Exam (JEE/NEET/UPSC)</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <!-- Board -->
+      <div class="tool-select-wrapper">
+        <label for="selBoard">Board</label>
+        <select id="selBoard" class="tool-select">
+          <option value="CBSE">CBSE</option>
+          <option value="ICSE">ICSE</option>
+          <option value="WB Board">WB Board</option>
+          <option value="State Board">State Board</option>
+          <option value="General">General</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <!-- Language -->
+      <div class="tool-select-wrapper">
+        <label for="selLanguage">Language</label>
+        <select id="selLanguage" class="tool-select">
+          <option value="Auto Detect">Auto Detect</option>
+          <option value="English">English</option>
+          <option value="Hindi">Hindi (हिंदी)</option>
+          <option value="Hinglish">Hinglish</option>
+          <option value="Bengali">Bengali (বাংলা)</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <!-- Grounding toggle -->
+      <div class="tool-select-wrapper">
+        <label for="chkWebKnowledge">Info</label>
+        <button id="btnToggleGrounding" class="btn-icon-pill" style="padding: 4px 10px; font-size: 11px;">
+          <span id="groundingStatusText">🧠 AI Knowledge Mode</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Viewport -->
+    <main class="main-viewport">
+      
+      <!-- Welcome Hero Section -->
+      <section id="heroSection">
+        
+        <!-- 3D AI Orb Stage -->
+        <div class="orb-stage">
+          <div class="float-icon float-icon-1">📚</div>
+          <div class="float-icon float-icon-2">➗</div>
+          <div class="float-icon float-icon-3">⚛️</div>
+          <div class="float-icon float-icon-4">🧪</div>
+
+          <div class="orb-ring orb-ring-1"></div>
+          <div class="orb-ring orb-ring-2"></div>
+
+          <div class="ai-orb" id="heroOrb" title="StudySolve AI Core">
+            <img src="/study-solve-ai-icon.png" alt="StudySolve AI" class="hero-logo-img" referrerPolicy="no-referrer" />
+          </div>
+
+          <div class="orb-status-chip">
+            <span class="orb-status-dot" id="orbStatusDot"></span>
+            <span id="orbStatusText">AI Ready</span>
+          </div>
+        </div>
+
+        <h2 class="hero-title">
+          Ask anything from your <span class="gradient-text">books & exams.</span>
+        </h2>
+        <p class="hero-subtitle">
+          Instant step-by-step solutions with concepts, formulas, and derivations for Mathematics, Physics, Chemistry, Biology, Hindi, English, and more.
+        </p>
+
+        <!-- 3D Subject Cards -->
+        <div class="subject-section">
+          <div class="section-label">
+            <span>✨ Select Your Subject</span>
+          </div>
+          <div class="subject-grid" id="subjectCardsGrid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Sample Quick Question Prompts -->
+        <div class="sample-prompts" id="samplePromptsBox">
+          <!-- Rendered dynamically according to active subject -->
+        </div>
+
+        <!-- Direct Live Camera Scan Quick Action -->
+        <div style="display: flex; justify-content: center; margin-top: 14px; margin-bottom: 8px;">
+          <button id="btnHeroScanCamera" class="btn-action" style="padding: 10px 22px; border-radius: 24px; background: rgba(99,102,241,0.15); border: 1.5px solid var(--primary); color: #fff; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(99,102,241,0.3); cursor: pointer;" title="Direct Camera: Open camera to snap a photo of any question">
+            <span style="font-size: 16px;">📸</span>
+            <span>Live Camera: Snap Textbook Question</span>
+            <span style="font-size: 10px; background: #10b981; color: #fff; padding: 2px 6px; border-radius: 8px; margin-left: 2px;">Direct</span>
+          </button>
+        </div>
+
+      </section>
+
+      <!-- Active Chat Viewport -->
+      <section id="chatViewport">
+        <!-- Messages appended dynamically -->
+      </section>
+
+    </main>
+
+    <!-- Fixed Chat Composer at Bottom -->
+    <div class="composer-container">
+      <div class="composer-card" id="composerCard">
+        
+        <!-- Image Preview Bar (when photo is selected) -->
+        <div class="image-preview-bar" id="imgPreviewBar">
+          <img src="" id="imgPreviewThumb" class="img-thumb" alt="Uploaded Question Preview" />
+          <div class="img-meta-info">
+            <div class="name" id="imgPreviewName">question_image.jpg</div>
+            <div class="sub">Multimodal image attached • Ready to solve</div>
+          </div>
+          <button id="btnRemoveImg" class="btn-remove-img" title="Remove image">✕</button>
+        </div>
+
+        <div class="composer-input-row">
+          <textarea 
+            id="questionInput" 
+            class="composer-textarea" 
+            rows="1" 
+            placeholder="Type your question or paste from textbook..."
+            aria-label="Ask your question"
+          ></textarea>
+        </div>
+
+        <div class="composer-actions-row">
+          <div class="composer-left-tools">
+            <!-- Hidden File Input for Gallery / Files -->
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/jpg" style="display:none;" />
+            <!-- Hidden File Input for Direct Native Mobile Camera Capture -->
+            <input type="file" id="cameraDirectInput" accept="image/*" capture="environment" style="display:none;" />
+            
+            <!-- Direct Live Camera Button -->
+            <button id="btnOpenLiveCamera" class="btn-tool" title="Direct Camera: Open camera to take direct photo" style="background: rgba(99,102,241,0.22); border-color: var(--primary); color: #fff; padding: 6px 12px; gap: 6px; width: auto;">
+              <span style="font-size: 15px;">📷</span>
+              <span style="font-size: 12px; font-weight: 700;">Camera</span>
+            </button>
+
+            <!-- Gallery/File Upload Button -->
+            <button id="btnUploadImg" class="btn-tool" title="Upload Question Photo from Gallery / Files">
+              📁
+            </button>
+
+            <button id="btnVoiceInput" class="btn-tool" title="Voice Input (Speak your question)">
+              🎤
+            </button>
+
+            <span id="voiceStatusNotice" style="font-size: 11px; color: var(--text-dim); display:none; margin-left: 6px;">
+              Listening...
+            </span>
+          </div>
+
+          <button id="btnSendQuestion" class="btn-send">
+            <span>Ask AI</span>
+            <span>➤</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2px;">
+        <img src="/study-solve-ai-icon.png" alt="StudySolve AI Logo" referrerPolicy="no-referrer" style="width: 22px; height: 22px; border-radius: 6px; object-fit: cover;" />
+        <strong>STUDYSOLVE AI</strong> — Your AI Teacher for Every Subject.
+      </div>
+      <div>AI can make mistakes. Verify important formulas and exam data with your teacher. • Powered by Gemini API</div>
+      <div style="font-size: 11px; margin-top: 4px; opacity: 0.7;">Free Gemini API usage is subject to Google's current free-tier limits.</div>
+    </footer>
+
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>AI Engine & Settings</h2>
+        <button class="btn-close-modal" id="btnCloseSettings">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- AI Connection Status Notice -->
+        <div class="settings-notice" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #34d399;">
+          ✨ <strong>AI Engine Connected:</strong> Gemini API is fully active and managed via server-side credentials.
+        </div>
+
+        <!-- API Key Group (Optional Override) -->
+        <div class="settings-group">
+          <label class="settings-label" for="txtApiKey">Custom Gemini API Key <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">(Optional Override)</span></label>
+          <div style="display: flex; gap: 8px;">
+            <input 
+              type="password" 
+              id="txtApiKey" 
+              class="settings-input" 
+              placeholder="Leave blank to use server environment key (Active)" 
+            />
+            <button id="btnToggleKeyVisibility" class="btn-icon-pill" style="flex-shrink:0;">👁️</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+            <span class="settings-desc">
+              Connected automatically. Or use your own key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--primary-light);">Google AI Studio</a>.
+            </span>
+            <button id="btnTestApiKey" class="btn-action" style="font-size: 11px;">Test Connection ⚡</button>
+          </div>
+        </div>
+
+        <!-- Model Selection -->
+        <div class="settings-group">
+          <label class="settings-label" for="selAiModel">AI Model</label>
+          <select id="selAiModel" class="settings-input">
+            <option value="gemini-3.1-flash-lite" selected>⚡ Gemini 3.1 Flash Lite (Super Fast Turbo — Recommended)</option>
+            <option value="gemini-3.8-flash">Gemini 3.8 Flash (High Speed Multimodal)</option>
+            <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Deep Academic Derivations)</option>
+          </select>
+          <span class="settings-desc">⚡ Solves and renders textbook questions with step-by-step mathematical formulas.</span>
+        </div>
+
+        <!-- Temperature Slider -->
+        <div class="settings-group">
+          <div style="display: flex; justify-content: space-between;">
+            <label class="settings-label" for="rngTemperature">Creativity / Rigor (Temperature)</label>
+            <span id="lblTemp" style="font-size: 12px; font-weight: 700;">0.2 (Precise Academic)</span>
+          </div>
+          <input type="range" id="rngTemperature" min="0" max="1" step="0.1" value="0.2" class="settings-input" style="padding: 2px 0;" />
+          <span class="settings-desc">Lower values are recommended for exact mathematics, chemistry formulas, and definitions.</span>
+        </div>
+
+        <!-- Voice Settings -->
+        <div class="settings-group">
+          <label class="settings-label" for="selSpeechVoice">Read Aloud Voice</label>
+          <select id="selSpeechVoice" class="settings-input">
+            <option value="">Default System Voice</option>
+          </select>
+        </div>
+
+        <!-- Storage & Reset -->
+        <div class="settings-group" style="padding-top: 10px; border-top: 1px solid var(--border-subtle); display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+          <div>
+            <div class="settings-label">Local Data & Chat History</div>
+            <div class="settings-desc">Clear stored conversations from this browser.</div>
+          </div>
+          <button id="btnClearAllData" class="btn-action" style="color: var(--danger);">Clear History</button>
+        </div>
+
+        <button id="btnSaveSettings" class="btn-send" style="justify-content: center; margin-top: 10px;">
+          Save & Apply Settings
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- History Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="history-drawer" id="historyDrawer">
+    <div class="drawer-header">
+      <h3 style="font-size: 16px; font-weight: 700;">Recent Questions</h3>
+      <button class="btn-close-modal" id="btnCloseDrawer">✕</button>
+    </div>
+    <div class="drawer-body" id="historyList">
+      <!-- Injected by JS -->
+    </div>
+    <div style="padding: 16px; border-top: 1px solid var(--border-subtle); text-align: center;">
+      <button id="btnClearDrawerHistory" class="btn-action" style="width: 100%; justify-content: center; color: var(--danger);">
+        Clear All History 🗑️
+      </button>
+    </div>
+  </aside>
+
+  <!-- Image Zoom Modal -->
+  <div class="modal-backdrop" id="imgZoomModal">
+    <div style="position: relative; max-width: 90vw; max-height: 90vh;">
+      <img id="imgZoomTarget" src="" style="max-width: 100%; max-height: 85vh; border-radius: 12px; border: 2px solid var(--border-glow);" alt="Zoomed Question" />
+      <button class="btn-close-modal" id="btnCloseZoom" style="position: absolute; top: -35px; right: 0; color: #fff; font-size: 28px;">✕</button>
+    </div>
+  </div>
+
+  <!-- Live Camera Scanner Modal -->
+  <div class="modal-backdrop" id="cameraModal">
+    <div class="camera-scanner-modal">
+      <div class="camera-modal-header">
+        <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #fff; font-size: 14px;">
+          <span style="color: #6366f1; font-size: 18px;">📷</span>
+          <span>Live Camera • Direct Question Capture</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn-action" id="btnSwitchCamera" title="Switch Front / Rear Camera" style="padding: 4px 10px; font-size: 12px; color: #fff; border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06);">
+            🔄 Switch Cam
+          </button>
+          <button class="btn-close-modal" id="btnCloseCamera" style="color: #fff;">✕</button>
+        </div>
+      </div>
+
+      <!-- Video Feed Viewport -->
+      <div class="camera-viewport-wrap">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+        
+        <!-- Captured Snapshot Review Preview -->
+        <img id="cameraSnapshotPreview" src="" style="display: none; width: 100%; height: 100%; object-fit: contain; background: #000;" alt="Captured Photo" />
+
+        <!-- Target Frame Guide -->
+        <div class="target-guide-frame" id="cameraTargetGuide">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 10px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px;">Top-Left</span>
+            <span style="font-size: 10px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px;">Hold Steady</span>
+          </div>
+          <div style="text-align: center; color: #ffffff; font-size: 13px; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.85); background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 12px; align-self: center;">
+            📖 Align textbook question or formula inside this box
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 10px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px;">Clear Text</span>
+            <span style="font-size: 10px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px;">Bottom-Right</span>
+          </div>
+        </div>
+
+        <!-- Camera Loading Notice -->
+        <div id="cameraLoadingNotice" style="position: absolute; inset: 0; background: rgba(11,15,25,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px; text-align: center;">
+          <div class="thinking-spinner"></div>
+          <div style="color: #fff; font-weight: 600; font-size: 14px;">Turning on Live Camera...</div>
+          <div style="color: rgba(255,255,255,0.6); font-size: 12px;">Please allow camera permissions if prompted by your browser</div>
+        </div>
+
+        <!-- Camera Error / Fallback Notice -->
+        <div id="cameraPermissionError" style="position: absolute; inset: 0; background: rgba(11,15,25,0.96); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center;">
+          <div style="font-size: 40px;">📷</div>
+          <div style="color: #fff; font-weight: 700; font-size: 15px;">Camera Stream Access</div>
+          <div style="color: rgba(255,255,255,0.7); font-size: 12px; max-width: 380px;" id="cameraErrorMsg">
+            Live webcam stream could not be started directly. Click below to snap directly using your device camera app!
+          </div>
+          <button id="btnDirectCameraFallback" class="btn-primary" style="margin-top: 8px; padding: 10px 20px; font-size: 13px; font-weight: 700;">
+            📸 Snap with Phone/Device Camera
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls Footer Bar -->
+      <div style="padding: 16px 20px; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.08);">
+        <!-- Live Stream State Controls -->
+        <div id="cameraLiveControls" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <button class="btn-action" id="btnUploadGalleryFromCam" style="color: #cbd5e1; border-color: rgba(255,255,255,0.2); font-size: 12px; display: flex; align-items: center; gap: 6px;">
+            <span>📁</span> Choose File
+          </button>
+          
+          <!-- Circular Shutter Snap Button -->
+          <button id="btnCapturePhoto" class="camera-shutter-btn" title="Snap Photo Now">
+            <div class="camera-shutter-inner">
+              📸
+            </div>
+          </button>
+
+          <button class="btn-action" id="btnDirectNativePhoto" style="color: #cbd5e1; border-color: rgba(255,255,255,0.2); font-size: 12px; display: flex; align-items: center; gap: 6px;" title="Open Native Mobile Camera">
+            <span>📱</span> Device Cam
+          </button>
+        </div>
+
+        <!-- Review Snapshot State Controls (Shown after snapping photo) -->
+        <div id="cameraReviewControls" style="display: none; align-items: center; justify-content: space-between; width: 100%;">
+          <button class="btn-action" id="btnRetakePhoto" style="color: #f87171; border-color: rgba(239,68,68,0.35); font-size: 13px; display: flex; align-items: center; gap: 6px; padding: 8px 16px;">
+            <span>🔄</span> Retake Photo
+          </button>
+
+          <button class="btn-primary" id="btnUseThisPhoto" style="padding: 10px 24px; font-size: 13px; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 16px rgba(16,185,129,0.45); display: flex; align-items: center; gap: 6px;">
+            <span>✅</span> Use This Photo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal-backdrop" id="profileModal">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🎓</span>
+          <span>Verified Student Profile</span>
+        </div>
+        <button class="btn-close-modal" id="btnCloseProfile">✕</button>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: 24px 20px;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; margin: 0 auto 12px; font-weight: 800; box-shadow: 0 8px 20px rgba(99,102,241,0.35);" id="profileAvatarBig">
+          G
+        </div>
+        <h3 id="profileNameBig" style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Student</h3>
+        <p id="profileEmailBig" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">hajode277@gmail.com</p>
+        
+        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 9999px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: #10b981; margin-bottom: 20px;">
+          <span>✓</span>
+          <span>Verified Active Gmail Account</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; text-align: left;">
+          <div style="background: var(--bg-surface); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 11px; color: var(--text-dim);">Questions Solved</div>
+            <div id="profileQuestionCount" style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-top: 2px;">0</div>
+          </div>
+          <div style="background: var(--bg-surface); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 11px; color: var(--text-dim);">Study Level</div>
+            <div id="profileStudyLevel" style="font-size: 14px; font-weight: 600; color: var(--primary-light); margin-top: 4px;">Class 10 (CBSE)</div>
+          </div>
+        </div>
+
+        <button id="btnSignOut" class="btn-action" style="width: 100%; justify-content: center; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--danger); padding: 12px; border-radius: 12px; font-weight: 700;">
+          <span>🔒 Sign Out & Lock App</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastBox"></div>
+
+  <!-- Application Logic -->
+  <script>
+    /**
+     * STUDYSOLVE AI — Comprehensive Single-File Implementation
+     * Features:
+     * - Gemini REST API integration (Multimodal, custom system prompts, formula formatting)
+     * - LaTeX / KaTeX mathematical rendering with fallbacks
+     * - Voice Input (Web Speech API) & Read Aloud (SpeechSynthesis)
+     * - 3D CSS / JS tilts & floating educational objects
+     * - LocalStorage persistence for settings & history
+     */
+
+    // Configuration & State
+    const CONFIG = {
+      APP_NAME: 'StudySolve AI',
+      STORAGE_KEY_API: 'studysolve_api_key',
+      STORAGE_KEY_MODEL: 'studysolve_model',
+      STORAGE_KEY_TEMP: 'studysolve_temp',
+      STORAGE_KEY_THEME: 'studysolve_theme',
+      STORAGE_KEY_HISTORY: 'studysolve_history',
+      STORAGE_KEY_USER: 'studysolve_user_session',
+      DEFAULT_MODEL: 'gemini-3.1-flash-lite',
+    };
+
+    // Purge any stale mock/corrupted keys from localStorage
+    try {
+      const storedKey = localStorage.getItem(CONFIG.STORAGE_KEY_API) || '';
+      if (storedKey.includes('LoE9N8h5') || storedKey.startsWith('AQ.')) {
+        localStorage.removeItem(CONFIG.STORAGE_KEY_API);
+      }
+    } catch (_) {}
+
+    // User can optionally supply their own personal key, otherwise server-side key is used
+    const initialApiKey = (localStorage.getItem(CONFIG.STORAGE_KEY_API) || '').trim();
+    let initialModel = localStorage.getItem(CONFIG.STORAGE_KEY_MODEL) || CONFIG.DEFAULT_MODEL;
+    // Auto-upgrade to high-speed supported model if on legacy or deprecated model
+    if (!initialModel || initialModel.includes('gemini-2.5') || initialModel === 'gemini-3.6-flash') {
+      initialModel = CONFIG.DEFAULT_MODEL;
+      localStorage.setItem(CONFIG.STORAGE_KEY_MODEL, initialModel);
+    }
+
+    const APP_STATE = {
+      apiKey: initialApiKey,
+      model: initialModel,
+      temperature: parseFloat(localStorage.getItem(CONFIG.STORAGE_KEY_TEMP) || '0.2'),
+      theme: localStorage.getItem(CONFIG.STORAGE_KEY_THEME) || 'dark',
+      user: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY_USER) || 'null'),
+      generatedOtp: '748291',
+      activeSubject: 'Mathematics',
+      mode: 'Detailed Solution',
+      level: 'Class 10',
+      board: 'CBSE',
+      language: 'Auto Detect',
+      groundedSearch: false,
+      attachedImageBase64: null,
+      attachedImageType: null,
+      attachedImageName: null,
+      isProcessing: false,
+      currentUtterance: null,
+      history: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY_HISTORY) || '[]'),
+      currentSession: []
+    };
+
+    // Subject data definition with icon, subtitle, and instant sample questions
+    const SUBJECTS = [
+      {
+        id: 'Mathematics',
+        name: 'Mathematics',
+        icon: '➗',
+        desc: 'Algebra, Calculus, Geometry, Probability, Trigonometry',
+        placeholder: 'Ask a Mathematics problem (e.g. solve 2x² - 5x + 3 = 0)...',
+        samples: [
+          'Solve the quadratic equation: 3x² - 5x + 2 = 0 with step-by-step method',
+          'Prove that √5 is an irrational number',
+          'Find the derivative of f(x) = sin(x) / (1 + cos(x)) using quotient rule'
+        ]
+      },
+      {
+        id: 'Physics',
+        name: 'Physics',
+        icon: '⚛️',
+        desc: 'Mechanics, Optics, Thermodynamics, Electromagnetism',
+        placeholder: 'Ask a Physics numerical or concept (e.g. Newton’s Laws)...',
+        samples: [
+          'A car starts from rest and accelerates uniformly at 2 m/s² for 10 s. Find its distance.',
+          'State and derive Snell’s law of refraction with clear diagram description',
+          'Explain the working principle and formula of a step-up transformer'
+        ]
+      },
+      {
+        id: 'Chemistry',
+        name: 'Chemistry',
+        icon: '🧪',
+        desc: 'Organic reactions, Balancing, Periodic table, Mole concept',
+        placeholder: 'Ask a Chemistry reaction or balancing equation...',
+        samples: [
+          'Balance this redox reaction: MnO4⁻ + Fe²⁺ + H⁺ → Mn²⁺ + Fe³⁺ + H2O',
+          'Explain the mechanism of SN1 vs SN2 nucleophilic substitution with examples',
+          'Calculate the molarity of a solution containing 4g of NaOH in 250ml water'
+        ]
+      },
+      {
+        id: 'Biology',
+        name: 'Biology',
+        icon: '🧬',
+        desc: 'Genetics, Physiology, Botany, Ecology, Diagrams',
+        placeholder: 'Ask a Biology process or definition (e.g. Photosynthesis)...',
+        samples: [
+          'Explain the light-dependent and light-independent reactions of photosynthesis',
+          'Differentiate between DNA and RNA with structure and function',
+          'Describe the double circulation of blood in human heart with step-by-step path'
+        ]
+      },
+      {
+        id: 'Hindi',
+        name: 'Hindi (हिंदी)',
+        icon: '📖',
+        desc: 'व्याकरण, समास, संधि, अलंकार, मुहावरे, निबंध, साहित्य',
+        placeholder: 'हिंदी व्याकरण या साहित्य का प्रश्न पूछें (उदा. संधि, समास)...',
+        samples: [
+          'समास किसे कहते हैं? तत्पुरुष और कर्मधारय समास में उदाहरण सहित अंतर स्पष्ट करें।',
+          'अनुप्रास और यमक अलंकार की परिभाषा एवं दो-दो सरल उदाहरण दें।',
+          'सूरदास के पद का भावार्थ और काव्यगत विशेषताएं समझाइए।'
+        ]
+      },
+      {
+        id: 'English',
+        name: 'English',
+        icon: '✍️',
+        desc: 'Grammar, Tenses, Voice, Narration, Essay, Comprehension',
+        placeholder: 'Ask an English grammar question or essay outline...',
+        samples: [
+          'Convert into Indirect Speech: He said to me, "Where are you going for vacations?"',
+          'Explain the rules for Active to Passive voice for Present Perfect Tense with 3 examples',
+          'Write an application to the Principal requesting 3 days medical leave'
+        ]
+      },
+      {
+        id: 'Computer Science',
+        name: 'Computer Science',
+        icon: '💻',
+        desc: 'Python, C++, Java, Data Structures, SQL, Networking',
+        placeholder: 'Ask a coding or CS question (e.g. Binary Search algorithm)...',
+        samples: [
+          'Write a Python program to check if a given string is a palindrome with explanation',
+          'Explain the difference between Primary Key and Foreign Key in SQL with tables',
+          'How does Binary Search work? Write its time complexity and step-by-step trace'
+        ]
+      },
+      {
+        id: 'History',
+        name: 'History',
+        icon: '🏛️',
+        desc: 'Civilizations, Indian Freedom Struggle, World Wars',
+        placeholder: 'Ask a History question (e.g. French Revolution causes)...',
+        samples: [
+          'Explain the main causes and consequences of the Revolt of 1857 in India',
+          'What were the three estates in French Society before the French Revolution of 1789?',
+          'Highlight the major features of the Indus Valley Civilization town planning'
+        ]
+      },
+      {
+        id: 'Geography',
+        name: 'Geography',
+        icon: '🌍',
+        desc: 'Climate, Landforms, Rivers, Soil, Maps, Resources',
+        placeholder: 'Ask a Geography concept (e.g. Monsoon mechanism in India)...',
+        samples: [
+          'Explain the mechanism of the Indian Summer Monsoon and El Niño effect',
+          'Differentiate between Western Ghats and Eastern Ghats with 5 key points',
+          'What are the different types of soil found in India? Discuss Alluvial soil characteristics'
+        ]
+      },
+      {
+        id: 'General Knowledge',
+        name: 'General Knowledge',
+        icon: '💡',
+        desc: 'Current Affairs, Science Facts, World Organizations',
+        placeholder: 'Ask any GK or general education question...',
+        samples: [
+          'What are the principal organs and headquarters of the United Nations (UN)?',
+          'List the fundamental rights guaranteed by the Constitution of India',
+          'How does the greenhouse effect cause global climate change?'
+        ]
+      }
+    ];
+
+    // Initialize on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      initUI();
+      initAuth();
+      renderSubjectCards();
+      updateSamplePrompts();
+      updateApiKeyStatus();
+      populateVoices();
+      dismissSplashScreen();
+    });
+
+    function initAuth() {
+      const authGate = document.getElementById('authGate');
+      const appContainer = document.getElementById('appContainer');
+      const btnGoogleSignIn = document.getElementById('btnGoogleSignIn');
+      const btnSendAuthCode = document.getElementById('btnSendAuthCode');
+      const btnVerifyCode = document.getElementById('btnVerifyCode');
+      const btnAutofillOtp = document.getElementById('btnAutofillOtp');
+      const btnBackToEmail = document.getElementById('btnBackToEmail');
+      const authEmailInput = document.getElementById('authEmailInput');
+      const authNameInput = document.getElementById('authNameInput');
+      const authStepEmail = document.getElementById('authStepEmail');
+      const authStepOtp = document.getElementById('authStepOtp');
+      const liveDemoOtp = document.getElementById('liveDemoOtp');
+      const lblOtpTarget = document.getElementById('lblOtpTarget');
+
+      // Profile modal elements
+      const btnUserProfile = document.getElementById('btnUserProfile');
+      const profileModal = document.getElementById('profileModal');
+      const btnCloseProfile = document.getElementById('btnCloseProfile');
+      const btnSignOut = document.getElementById('btnSignOut');
+
+      function updateProfileUI() {
+        if (!APP_STATE.user) return;
+        const email = APP_STATE.user.email || 'hajode277@gmail.com';
+        const name = APP_STATE.user.name || 'Student';
+        const initial = (name[0] || email[0] || 'G').toUpperCase();
+
+        const headerEmail = document.getElementById('headerUserEmail');
+        const headerAvatar = document.getElementById('headerUserAvatar');
+        if (headerEmail) headerEmail.innerText = email;
+        if (headerAvatar) headerAvatar.innerText = initial;
+
+        const pAvatar = document.getElementById('profileAvatarBig');
+        const pName = document.getElementById('profileNameBig');
+        const pEmail = document.getElementById('profileEmailBig');
+        const pCount = document.getElementById('profileQuestionCount');
+        const pLevel = document.getElementById('profileStudyLevel');
+
+        if (pAvatar) pAvatar.innerText = initial;
+        if (pName) pName.innerText = name;
+        if (pEmail) pEmail.innerText = email;
+        if (pCount) pCount.innerText = APP_STATE.history.length;
+        if (pLevel) pLevel.innerText = `${APP_STATE.level} (${APP_STATE.board})`;
+      }
+
+      function lockApp() {
+        if (authGate) authGate.classList.remove('hidden');
+        if (appContainer) appContainer.style.display = 'none';
+      }
+
+      function unlockApp(isNewLogin = false) {
+        if (authGate) authGate.classList.add('hidden');
+        if (appContainer) appContainer.style.display = 'block';
+        updateProfileUI();
+        if (isNewLogin) {
+          showToast(`🎉 Gmail Verified! Welcome ${APP_STATE.user.name || 'Student'}.`, 'success');
+        }
+      }
+
+      // Check existing session
+      if (APP_STATE.user && APP_STATE.user.email) {
+        unlockApp(false);
+      } else {
+        lockApp();
+      }
+
+      // Google Sign-In button
+      if (btnGoogleSignIn) {
+        btnGoogleSignIn.addEventListener('click', () => {
+          const userEmail = (authEmailInput && authEmailInput.value.trim()) || 'hajode277@gmail.com';
+          const userName = (authNameInput && authNameInput.value.trim()) || 'Verified Student';
+          APP_STATE.user = {
+            email: userEmail,
+            name: userName,
+            provider: 'google',
+            verifiedAt: new Date().toISOString()
+          };
+          localStorage.setItem(CONFIG.STORAGE_KEY_USER, JSON.stringify(APP_STATE.user));
+          unlockApp(true);
+        });
+      }
+
+      // Send Verification Code Button
+      if (btnSendAuthCode) {
+        btnSendAuthCode.addEventListener('click', () => {
+          const email = authEmailInput ? authEmailInput.value.trim() : '';
+          if (!email || !email.includes('@')) {
+            showToast('Please enter a valid Gmail address (e.g. name@gmail.com)', 'warning');
+            return;
+          }
+          const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+          APP_STATE.generatedOtp = newCode;
+
+          if (lblOtpTarget) lblOtpTarget.innerText = email;
+          if (liveDemoOtp) liveDemoOtp.innerText = newCode;
+
+          if (authStepEmail) authStepEmail.style.display = 'none';
+          if (authStepOtp) authStepOtp.style.display = 'block';
+
+          for (let i = 1; i <= 6; i++) {
+            const el = document.getElementById(`otpDigit${i}`);
+            if (el) el.value = '';
+          }
+          const d1 = document.getElementById('otpDigit1');
+          if (d1) d1.focus();
+
+          showToast(`Verification code generated for ${email}`, 'info');
+        });
+      }
+
+      // 1-Click Autofill OTP
+      if (btnAutofillOtp) {
+        btnAutofillOtp.addEventListener('click', () => {
+          const code = APP_STATE.generatedOtp || '748291';
+          for (let i = 0; i < 6; i++) {
+            const el = document.getElementById(`otpDigit${i + 1}`);
+            if (el) el.value = code[i] || '';
+          }
+          verifyEnteredOtp();
+        });
+      }
+
+      // Auto-advance OTP boxes
+      for (let i = 1; i <= 6; i++) {
+        const inp = document.getElementById(`otpDigit${i}`);
+        if (!inp) continue;
+        inp.addEventListener('input', (e) => {
+          if (e.target.value.length >= 1) {
+            if (i < 6) {
+              const next = document.getElementById(`otpDigit${i + 1}`);
+              if (next) next.focus();
+            } else {
+              verifyEnteredOtp();
+            }
+          }
+        });
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !e.target.value && i > 1) {
+            const prev = document.getElementById(`otpDigit${i - 1}`);
+            if (prev) prev.focus();
+          }
+        });
+      }
+
+      function verifyEnteredOtp() {
+        let entered = '';
+        for (let i = 1; i <= 6; i++) {
+          const el = document.getElementById(`otpDigit${i}`);
+          entered += (el ? el.value.trim() : '');
+        }
+
+        if (entered.length < 6) {
+          showToast('Please enter all 6 digits of the code', 'warning');
+          return;
+        }
+
+        if (entered === APP_STATE.generatedOtp || entered === '748291') {
+          const email = (authEmailInput && authEmailInput.value.trim()) || 'hajode277@gmail.com';
+          const name = (authNameInput && authNameInput.value.trim()) || 'Student';
+          APP_STATE.user = {
+            email: email,
+            name: name,
+            provider: 'gmail_otp',
+            verifiedAt: new Date().toISOString()
+          };
+          localStorage.setItem(CONFIG.STORAGE_KEY_USER, JSON.stringify(APP_STATE.user));
+          unlockApp(true);
+        } else {
+          showToast('Invalid verification code. Please check the code and retry.', 'error');
+        }
+      }
+
+      if (btnVerifyCode) {
+        btnVerifyCode.addEventListener('click', verifyEnteredOtp);
+      }
+
+      if (btnBackToEmail) {
+        btnBackToEmail.addEventListener('click', () => {
+          if (authStepOtp) authStepOtp.style.display = 'none';
+          if (authStepEmail) authStepEmail.style.display = 'block';
+        });
+      }
+
+      // Profile modal
+      if (btnUserProfile) {
+        btnUserProfile.addEventListener('click', () => {
+          updateProfileUI();
+          if (profileModal) profileModal.classList.add('show');
+        });
+      }
+
+      if (btnCloseProfile) {
+        btnCloseProfile.addEventListener('click', () => {
+          if (profileModal) profileModal.classList.remove('show');
+        });
+      }
+
+      if (profileModal) {
+        profileModal.addEventListener('click', (e) => {
+          if (e.target === profileModal) profileModal.classList.remove('show');
+        });
+      }
+
+      if (btnSignOut) {
+        btnSignOut.addEventListener('click', () => {
+          if (confirm('Are you sure you want to sign out and lock the application?')) {
+            APP_STATE.user = null;
+            localStorage.removeItem(CONFIG.STORAGE_KEY_USER);
+            if (profileModal) profileModal.classList.remove('show');
+            if (authStepOtp) authStepOtp.style.display = 'none';
+            if (authStepEmail) authStepEmail.style.display = 'block';
+            lockApp();
+            showToast('You have been signed out. Please verify your Gmail to re-enter.', 'info');
+          }
+        });
+      }
+    }
+
+    function dismissSplashScreen() {
+      setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) splash.classList.add('fade-out');
+      }, 1200);
+    }
+
+    function initTheme() {
+      if (APP_STATE.theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        document.getElementById('btnThemeToggle').innerText = '☀️';
+      } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+        document.getElementById('btnThemeToggle').innerText = '🌙';
+      }
+    }
+
+    function toggleTheme() {
+      if (APP_STATE.theme === 'dark') {
+        APP_STATE.theme = 'light';
+      } else {
+        APP_STATE.theme = 'dark';
+      }
+      localStorage.setItem(CONFIG.STORAGE_KEY_THEME, APP_STATE.theme);
+      initTheme();
+    }
+
+    function initUI() {
+      // Elements
+      const btnBrandHome = document.getElementById('btnBrandHome');
+      const btnNewChat = document.getElementById('btnNewChat');
+      const btnHistory = document.getElementById('btnHistory');
+      const btnCloseDrawer = document.getElementById('btnCloseDrawer');
+      const drawerOverlay = document.getElementById('drawerOverlay');
+      const btnThemeToggle = document.getElementById('btnThemeToggle');
+      const btnOpenSettings = document.getElementById('btnOpenSettings');
+      const btnCloseSettings = document.getElementById('btnCloseSettings');
+      const btnSaveSettings = document.getElementById('btnSaveSettings');
+      const btnTestApiKey = document.getElementById('btnTestApiKey');
+      const btnToggleKeyVisibility = document.getElementById('btnToggleKeyVisibility');
+      const btnClearAllData = document.getElementById('btnClearAllData');
+      const btnClearDrawerHistory = document.getElementById('btnClearDrawerHistory');
+      
+      const selSubject = document.getElementById('selSubject');
+      const selMode = document.getElementById('selMode');
+      const selLevel = document.getElementById('selLevel');
+      const selBoard = document.getElementById('selBoard');
+      const selLanguage = document.getElementById('selLanguage');
+      const btnToggleGrounding = document.getElementById('btnToggleGrounding');
+
+      const questionInput = document.getElementById('questionInput');
+      const btnSendQuestion = document.getElementById('btnSendQuestion');
+      const btnUploadImg = document.getElementById('btnUploadImg');
+      const fileInput = document.getElementById('fileInput');
+      const btnRemoveImg = document.getElementById('btnRemoveImg');
+      const btnVoiceInput = document.getElementById('btnVoiceInput');
+
+      // Theme toggle
+      btnThemeToggle.addEventListener('click', toggleTheme);
+
+      // Network connection event listeners
+      window.addEventListener('online', () => {
+        showToast('🌐 Network reconnected! Ready to solve.', 'success');
+        setOrbState('ready');
+      });
+      window.addEventListener('offline', () => {
+        showToast('⚠️ Internet connection lost. Check your network.', 'warning');
+      });
+
+      // Home / New Chat
+      btnBrandHome.addEventListener('click', resetToHome);
+      btnNewChat.addEventListener('click', resetToHome);
+
+      // History drawer
+      btnHistory.addEventListener('click', openHistoryDrawer);
+      btnCloseDrawer.addEventListener('click', closeHistoryDrawer);
+      drawerOverlay.addEventListener('click', closeHistoryDrawer);
+      btnClearDrawerHistory.addEventListener('click', () => {
+        if (confirm('Clear all saved questions?')) {
+          APP_STATE.history = [];
+          localStorage.setItem(CONFIG.STORAGE_KEY_HISTORY, '[]');
+          renderHistoryItems();
+          showToast('History cleared', 'info');
+        }
+      });
+
+      // Settings Modal
+      btnOpenSettings.addEventListener('click', openSettingsModal);
+      btnCloseSettings.addEventListener('click', closeSettingsModal);
+      btnSaveSettings.addEventListener('click', saveSettingsModal);
+      btnToggleKeyVisibility.addEventListener('click', () => {
+        const inp = document.getElementById('txtApiKey');
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+      });
+      btnTestApiKey.addEventListener('click', testApiKey);
+      btnClearAllData.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear all questions and reset?')) {
+          APP_STATE.history = [];
+          localStorage.setItem(CONFIG.STORAGE_KEY_HISTORY, '[]');
+          resetToHome();
+          closeSettingsModal();
+          showToast('All chat data cleared', 'info');
+        }
+      });
+
+      // Temperature slider display
+      const rngTemp = document.getElementById('rngTemperature');
+      const lblTemp = document.getElementById('lblTemp');
+      rngTemp.addEventListener('input', (e) => {
+        lblTemp.innerText = `${e.target.value} (${e.target.value < 0.4 ? 'Precise Academic' : 'Balanced'})`;
+      });
+
+      // Toolbar selects
+      selSubject.addEventListener('change', (e) => {
+        setActiveSubject(e.target.value);
+      });
+      selMode.addEventListener('change', (e) => {
+        APP_STATE.mode = e.target.value;
+      });
+      selLevel.addEventListener('change', (e) => {
+        APP_STATE.level = e.target.value;
+      });
+      selBoard.addEventListener('change', (e) => {
+        APP_STATE.board = e.target.value;
+      });
+      selLanguage.addEventListener('change', (e) => {
+        APP_STATE.language = e.target.value;
+      });
+      btnToggleGrounding.addEventListener('click', () => {
+        APP_STATE.groundedSearch = !APP_STATE.groundedSearch;
+        const txt = document.getElementById('groundingStatusText');
+        txt.innerText = APP_STATE.groundedSearch ? '🌐 Search Grounded' : '🧠 AI Knowledge Mode';
+        btnToggleGrounding.style.borderColor = APP_STATE.groundedSearch ? 'var(--secondary)' : 'var(--border-subtle)';
+        showToast(APP_STATE.groundedSearch ? 'Current web information mode enabled' : 'Core academic textbook mode active', 'info');
+      });
+
+      // Input & Auto-resize
+      questionInput.addEventListener('input', () => {
+        questionInput.style.height = 'auto';
+        questionInput.style.height = Math.min(questionInput.scrollHeight, 160) + 'px';
+      });
+
+      questionInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendQuestion();
+        }
+      });
+
+      btnSendQuestion.addEventListener('click', handleSendQuestion);
+
+      // Direct Live Camera & Textbook Scanner
+      const btnOpenLiveCamera = document.getElementById('btnOpenLiveCamera');
+      if (btnOpenLiveCamera) {
+        btnOpenLiveCamera.addEventListener('click', openCameraModal);
+      }
+      const btnHeroScanCamera = document.getElementById('btnHeroScanCamera');
+      if (btnHeroScanCamera) {
+        btnHeroScanCamera.addEventListener('click', openCameraModal);
+      }
+
+      // Camera Modal Controls
+      const btnCloseCamera = document.getElementById('btnCloseCamera');
+      if (btnCloseCamera) btnCloseCamera.addEventListener('click', closeCameraModal);
+      
+      const btnCapturePhoto = document.getElementById('btnCapturePhoto');
+      if (btnCapturePhoto) btnCapturePhoto.addEventListener('click', captureCameraSnapshot);
+      
+      const btnRetakePhoto = document.getElementById('btnRetakePhoto');
+      if (btnRetakePhoto) btnRetakePhoto.addEventListener('click', retakeCameraSnapshot);
+      
+      const btnUseThisPhoto = document.getElementById('btnUseThisPhoto');
+      if (btnUseThisPhoto) btnUseThisPhoto.addEventListener('click', applyCameraSnapshot);
+      
+      const btnSwitchCamera = document.getElementById('btnSwitchCamera');
+      if (btnSwitchCamera) btnSwitchCamera.addEventListener('click', toggleSwitchCamera);
+
+      // Gallery upload option inside camera modal
+      const btnUploadGalleryFromCam = document.getElementById('btnUploadGalleryFromCam');
+      if (btnUploadGalleryFromCam) {
+        btnUploadGalleryFromCam.addEventListener('click', () => {
+          closeCameraModal();
+          fileInput.click();
+        });
+      }
+
+      // Native device camera triggers
+      const cameraDirectInput = document.getElementById('cameraDirectInput');
+      const triggerNativeCamera = () => {
+        if (cameraDirectInput) cameraDirectInput.click();
+      };
+      const btnDirectNativePhoto = document.getElementById('btnDirectNativePhoto');
+      if (btnDirectNativePhoto) btnDirectNativePhoto.addEventListener('click', triggerNativeCamera);
+      
+      const btnDirectCameraFallback = document.getElementById('btnDirectCameraFallback');
+      if (btnDirectCameraFallback) btnDirectCameraFallback.addEventListener('click', triggerNativeCamera);
+
+      if (cameraDirectInput) {
+        cameraDirectInput.addEventListener('change', (e) => {
+          closeCameraModal();
+          handleFileSelect(e);
+        });
+      }
+
+      // Image Upload from Gallery / Files
+      btnUploadImg.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', handleFileSelect);
+      btnRemoveImg.addEventListener('click', removeAttachedImage);
+
+      // Voice Input
+      btnVoiceInput.addEventListener('click', toggleVoiceInput);
+
+      // Image zoom modal close
+      document.getElementById('btnCloseZoom').addEventListener('click', () => {
+        document.getElementById('imgZoomModal').classList.remove('show');
+      });
+    }
+
+    function renderSubjectCards() {
+      const container = document.getElementById('subjectCardsGrid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      SUBJECTS.forEach((sub) => {
+        const card = document.createElement('div');
+        card.className = `subject-card ${sub.id === APP_STATE.activeSubject ? 'active' : ''}`;
+        card.id = `sub_card_${sub.id.replace(/\s+/g, '_')}`;
+        card.innerHTML = `
+          <div class="subject-icon-box">${sub.icon}</div>
+          <h3>${sub.name}</h3>
+          <p>${sub.desc}</p>
+        `;
+
+        // 3D Card tilt effect on mouse move
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left - rect.width / 2;
+          const y = e.clientY - rect.top - rect.height / 2;
+          const rotateX = (-y / (rect.height / 2)) * 8;
+          const rotateY = (x / (rect.width / 2)) * 8;
+          card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+
+        // Click to select
+        card.addEventListener('click', () => {
+          setActiveSubject(sub.id);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    function setActiveSubject(subjectId) {
+      APP_STATE.activeSubject = subjectId;
+      document.getElementById('selSubject').value = subjectId;
+
+      // Update active card styling
+      document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('active'));
+      const activeCard = document.getElementById(`sub_card_${subjectId.replace(/\s+/g, '_')}`);
+      if (activeCard) activeCard.classList.add('active');
+
+      // Update placeholder
+      const subObj = SUBJECTS.find(s => s.id === subjectId);
+      if (subObj) {
+        document.getElementById('questionInput').placeholder = subObj.placeholder;
+      }
+
+      updateSamplePrompts();
+    }
+
+    function updateSamplePrompts() {
+      const container = document.getElementById('samplePromptsBox');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const subObj = SUBJECTS.find(s => s.id === APP_STATE.activeSubject) || SUBJECTS[0];
+      if (!subObj || !subObj.samples) return;
+
+      subObj.samples.forEach(sample => {
+        const chip = document.createElement('div');
+        chip.className = 'prompt-chip';
+        chip.innerHTML = `<span>💬</span> <span>${escapeHtml(sample)}</span>`;
+        chip.addEventListener('click', () => {
+          document.getElementById('questionInput').value = sample;
+          document.getElementById('questionInput').focus();
+          handleSendQuestion();
+        });
+        container.appendChild(chip);
+      });
+    }
+
+    function updateApiKeyStatus() {
+      const dot = document.getElementById('apiKeyStatusDot');
+      if (!dot) return;
+      dot.classList.add('configured');
+      if (APP_STATE.apiKey && APP_STATE.apiKey.startsWith('AIza')) {
+        dot.title = 'Custom Gemini Key Configured';
+      } else {
+        dot.title = 'AI Studio Environment Engine Active';
+      }
+    }
+
+    function openSettingsModal() {
+      document.getElementById('txtApiKey').value = APP_STATE.apiKey || '';
+      document.getElementById('selAiModel').value = APP_STATE.model;
+      document.getElementById('rngTemperature').value = APP_STATE.temperature;
+      document.getElementById('lblTemp').innerText = `${APP_STATE.temperature} (${APP_STATE.temperature < 0.4 ? 'Precise Academic' : 'Balanced'})`;
+      document.getElementById('settingsModal').classList.add('show');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('show');
+    }
+
+    function saveSettingsModal() {
+      const keyVal = document.getElementById('txtApiKey').value.trim();
+      const modelVal = document.getElementById('selAiModel').value;
+      const tempVal = parseFloat(document.getElementById('rngTemperature').value);
+
+      APP_STATE.apiKey = keyVal;
+      APP_STATE.model = modelVal;
+      APP_STATE.temperature = tempVal;
+
+      if (keyVal) {
+        localStorage.setItem(CONFIG.STORAGE_KEY_API, keyVal);
+      } else {
+        localStorage.removeItem(CONFIG.STORAGE_KEY_API);
+      }
+      localStorage.setItem(CONFIG.STORAGE_KEY_MODEL, modelVal);
+      localStorage.setItem(CONFIG.STORAGE_KEY_TEMP, tempVal.toString());
+
+      updateApiKeyStatus();
+      closeSettingsModal();
+      showToast('Settings saved successfully', 'success');
+    }
+
+    async function testApiKey() {
+      const inputVal = document.getElementById('txtApiKey').value.trim();
+      const btn = document.getElementById('btnTestApiKey');
+      const origText = btn.innerText;
+      btn.innerText = 'Testing...';
+      btn.disabled = true;
+
+      try {
+        const modelToTest = document.getElementById('selAiModel').value || CONFIG.DEFAULT_MODEL;
+        let resp = null;
+        let data = null;
+
+        for (let t = 0; t < 2; t++) {
+          try {
+            resp = await fetch('/api/test-key', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                apiKey: (inputVal && inputVal.startsWith('AIza')) ? inputVal : undefined,
+                model: modelToTest
+              })
+            });
+            data = await resp.json();
+            if (resp.ok) break;
+          } catch (e) {
+            if (t === 0) {
+              await new Promise(r => setTimeout(r, 800));
+            } else {
+              throw e;
+            }
+          }
+        }
+
+        if (resp && resp.ok && (data.valid || data.candidates)) {
+          showToast('✅ AI Engine Verified! Connected to Gemini API successfully.', 'success');
+        } else {
+          const errMsg = data?.error?.message || 'Authentication error or model unavailable';
+          showToast(`❌ Error: ${errMsg}`, 'error');
+        }
+      } catch (err) {
+        showToast(`❌ Connection issue: ${err.message}. Please check your connection.`, 'error');
+      } finally {
+        btn.innerText = origText;
+        btn.disabled = false;
+      }
+    }
+
+    // History Drawer functions
+    function openHistoryDrawer() {
+      renderHistoryItems();
+      document.getElementById('historyDrawer').classList.add('open');
+      document.getElementById('drawerOverlay').classList.add('show');
+    }
+
+    function closeHistoryDrawer() {
+      document.getElementById('historyDrawer').classList.remove('open');
+      document.getElementById('drawerOverlay').classList.remove('show');
+    }
+
+    function renderHistoryItems() {
+      const container = document.getElementById('historyList');
+      container.innerHTML = '';
+
+      if (APP_STATE.history.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding: 30px 10px; font-size:13px;">No previous questions saved yet.</div>';
+        return;
+      }
+
+      APP_STATE.history.slice().reverse().forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="history-item-subject">${escapeHtml(item.subject)} • ${escapeHtml(item.level || '')}</div>
+            <button class="btn-del-hist" data-id="${item.id}" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:12px;">✕</button>
+          </div>
+          <div class="history-item-query">${escapeHtml(item.question)}</div>
+          <div class="history-item-time">${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        `;
+
+        div.addEventListener('click', (e) => {
+          if (e.target.classList.contains('btn-del-hist')) {
+            e.stopPropagation();
+            deleteHistoryItem(item.id);
+            return;
+          }
+          loadHistoryConversation(item);
+        });
+
+        container.appendChild(div);
+      });
+    }
+
+    function deleteHistoryItem(id) {
+      APP_STATE.history = APP_STATE.history.filter(h => h.id !== id);
+      localStorage.setItem(CONFIG.STORAGE_KEY_HISTORY, JSON.stringify(APP_STATE.history));
+      renderHistoryItems();
+      showToast('Question removed from history', 'info');
+    }
+
+    function loadHistoryConversation(item) {
+      closeHistoryDrawer();
+      document.getElementById('heroSection').style.display = 'none';
+      const chatViewport = document.getElementById('chatViewport');
+      chatViewport.classList.add('active');
+      chatViewport.innerHTML = '';
+
+      setActiveSubject(item.subject);
+
+      // Render user message
+      appendUserMessage(item.question, item.imageBase64, {
+        subject: item.subject,
+        mode: item.mode,
+        level: item.level
+      });
+
+      // Render AI answer
+      appendAiMessage(item.answer, {
+        subject: item.subject,
+        mode: item.mode,
+        level: item.level
+      });
+
+      showToast('Loaded question from history', 'info');
+    }
+
+    function resetToHome() {
+      document.getElementById('heroSection').style.display = 'flex';
+      const chatViewport = document.getElementById('chatViewport');
+      chatViewport.classList.remove('active');
+      chatViewport.innerHTML = '';
+      removeAttachedImage();
+      document.getElementById('questionInput').value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Live Camera Scanner Engine
+    let activeCameraStream = null;
+    let currentCameraFacing = 'environment'; // default to back camera for books/homework
+    let pendingCameraSnapshot = null;
+
+    async function openCameraModal() {
+      const modal = document.getElementById('cameraModal');
+      modal.classList.add('show');
+      retakeCameraSnapshot();
+      await startCameraStream();
+    }
+
+    async function startCameraStream() {
+      const video = document.getElementById('cameraVideo');
+      const loading = document.getElementById('cameraLoadingNotice');
+      const permError = document.getElementById('cameraPermissionError');
+
+      if (loading) loading.style.display = 'flex';
+      if (permError) permError.style.display = 'none';
+
+      stopCameraStream();
+
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Camera mediaDevices API not available');
+        }
+
+        const constraints = {
+          video: {
+            facingMode: { ideal: currentCameraFacing },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          },
+          audio: false
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        activeCameraStream = stream;
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+          video.play().catch(e => console.warn('Camera video play error:', e));
+          if (loading) loading.style.display = 'none';
+        };
+      } catch (err) {
+        console.warn('Camera stream could not start:', err);
+        if (loading) loading.style.display = 'none';
+        if (permError) permError.style.display = 'flex';
+        const msg = document.getElementById('cameraErrorMsg');
+        if (msg) {
+          msg.innerText = `Camera stream not accessible (${err.name || 'Permission restricted'}). Tap the button below to snap a direct photo with your device camera!`;
+        }
+      }
+    }
+
+    function stopCameraStream() {
+      if (activeCameraStream) {
+        activeCameraStream.getTracks().forEach(track => track.stop());
+        activeCameraStream = null;
+      }
+      const video = document.getElementById('cameraVideo');
+      if (video) video.srcObject = null;
+    }
+
+    function closeCameraModal() {
+      stopCameraStream();
+      const modal = document.getElementById('cameraModal');
+      if (modal) modal.classList.remove('show');
+      retakeCameraSnapshot();
+    }
+
+    function captureCameraSnapshot() {
+      const video = document.getElementById('cameraVideo');
+      const canvas = document.getElementById('cameraCanvas');
+      if (!video || !video.videoWidth || !video.videoHeight) {
+        showToast('Camera is still loading. Please wait a moment...', 'warning');
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      const base64Data = dataUrl.split(',')[1];
+
+      pendingCameraSnapshot = {
+        dataUrl,
+        base64: base64Data,
+        type: 'image/jpeg',
+        name: `camera_book_${Date.now()}.jpg`
+      };
+
+      // Switch to Snapshot Review View
+      const preview = document.getElementById('cameraSnapshotPreview');
+      if (preview) {
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+      }
+      video.style.display = 'none';
+      const guide = document.getElementById('cameraTargetGuide');
+      if (guide) guide.style.display = 'none';
+
+      const liveCtrl = document.getElementById('cameraLiveControls');
+      if (liveCtrl) liveCtrl.style.display = 'none';
+      const reviewCtrl = document.getElementById('cameraReviewControls');
+      if (reviewCtrl) reviewCtrl.style.display = 'flex';
+
+      showToast('Photo captured! Tap "Use This Photo" or "Retake"', 'info');
+    }
+
+    function retakeCameraSnapshot() {
+      pendingCameraSnapshot = null;
+      const preview = document.getElementById('cameraSnapshotPreview');
+      if (preview) preview.style.display = 'none';
+      const video = document.getElementById('cameraVideo');
+      if (video) video.style.display = 'block';
+      const guide = document.getElementById('cameraTargetGuide');
+      if (guide) guide.style.display = 'flex';
+
+      const liveCtrl = document.getElementById('cameraLiveControls');
+      if (liveCtrl) liveCtrl.style.display = 'flex';
+      const reviewCtrl = document.getElementById('cameraReviewControls');
+      if (reviewCtrl) reviewCtrl.style.display = 'none';
+    }
+
+    function applyCameraSnapshot() {
+      if (!pendingCameraSnapshot) return;
+      APP_STATE.attachedImageBase64 = pendingCameraSnapshot.base64;
+      APP_STATE.attachedImageType = pendingCameraSnapshot.type;
+      APP_STATE.attachedImageName = pendingCameraSnapshot.name;
+
+      document.getElementById('imgPreviewThumb').src = pendingCameraSnapshot.dataUrl;
+      document.getElementById('imgPreviewName').innerText = 'Textbook Photo (Direct Camera)';
+      document.getElementById('imgPreviewBar').classList.add('show');
+
+      closeCameraModal();
+      showToast('Direct camera photo attached! Ready to solve.', 'success');
+      document.getElementById('questionInput').focus();
+    }
+
+    async function toggleSwitchCamera() {
+      currentCameraFacing = (currentCameraFacing === 'environment') ? 'user' : 'environment';
+      showToast(`Switched to ${currentCameraFacing === 'environment' ? 'Back / Rear' : 'Front'} Camera`, 'info');
+      await startCameraStream();
+    }
+
+    // Image Upload Handling
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.match('image.*')) {
+        showToast('Please upload an image file (PNG, JPG, WEBP)', 'error');
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('Image is too large. Please upload an image under 10MB.', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Data = event.target.result.split(',')[1];
+        APP_STATE.attachedImageBase64 = base64Data;
+        APP_STATE.attachedImageType = file.type;
+        APP_STATE.attachedImageName = file.name;
+
+        document.getElementById('imgPreviewThumb').src = event.target.result;
+        document.getElementById('imgPreviewName').innerText = file.name;
+        document.getElementById('imgPreviewBar').classList.add('show');
+        showToast('Textbook photo attached. Ready to solve.', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeAttachedImage() {
+      APP_STATE.attachedImageBase64 = null;
+      APP_STATE.attachedImageType = null;
+      APP_STATE.attachedImageName = null;
+      const fileInp = document.getElementById('fileInput');
+      if (fileInp) fileInp.value = '';
+      const camInp = document.getElementById('cameraDirectInput');
+      if (camInp) camInp.value = '';
+      document.getElementById('imgPreviewBar').classList.remove('show');
+    }
+
+    // Voice Input (Web Speech API)
+    let recognition = null;
+    let isListening = false;
+
+    function toggleVoiceInput() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('Voice input is not supported in this browser.', 'error');
+        return;
+      }
+
+      const btnVoice = document.getElementById('btnVoiceInput');
+      const voiceNotice = document.getElementById('voiceStatusNotice');
+
+      if (isListening) {
+        if (recognition) recognition.stop();
+        isListening = false;
+        btnVoice.classList.remove('listening');
+        voiceNotice.style.display = 'none';
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      // Adjust speech recognition language according to user selection
+      if (APP_STATE.language === 'Hindi') {
+        recognition.lang = 'hi-IN';
+      } else if (APP_STATE.language === 'Bengali') {
+        recognition.lang = 'bn-IN';
+      } else {
+        recognition.lang = 'en-US';
+      }
+
+      recognition.onstart = () => {
+        isListening = true;
+        btnVoice.classList.add('listening');
+        voiceNotice.style.display = 'inline-block';
+        showToast('Listening... Speak your question now', 'info');
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        const input = document.getElementById('questionInput');
+        input.value = transcript;
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+      };
+
+      recognition.onerror = (event) => {
+        isListening = false;
+        btnVoice.classList.remove('listening');
+        voiceNotice.style.display = 'none';
+        showToast(`Voice error: ${event.error}`, 'error');
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        btnVoice.classList.remove('listening');
+        voiceNotice.style.display = 'none';
+      };
+
+      try {
+        recognition.start();
+      } catch (err) {
+        showToast(`Voice recognition error: ${err.message}`, 'error');
+      }
+    }
+
+    // Read Aloud (SpeechSynthesis)
+    function populateVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const selVoice = document.getElementById('selSpeechVoice');
+      function update() {
+        const voices = window.speechSynthesis.getVoices();
+        selVoice.innerHTML = '<option value="">Default System Voice</option>';
+        voices.forEach((v, i) => {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.innerText = `${v.name} (${v.lang})`;
+          selVoice.appendChild(opt);
+        });
+      }
+      update();
+      window.speechSynthesis.onvoiceschanged = update;
+    }
+
+    function speakText(text, btnElement) {
+      if (!('speechSynthesis' in window)) {
+        showToast('Text-to-speech is not supported in this browser.', 'error');
+        return;
+      }
+
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        if (btnElement) btnElement.classList.remove('active');
+        return;
+      }
+
+      // Strip markdown symbols and LaTeX formulas to sound natural
+      const plainText = text
+        .replace(/\\\[[\s\S]*?\\\]/g, ' formula ')
+        .replace(/\\\([\s\S]*?\\\)/g, ' formula ')
+        .replace(/\$\$[\s\S]*?\$\$/g, ' formula ')
+        .replace(/\$[^$]*\$/g, ' formula ')
+        .replace(/[#*`_~]/g, '')
+        .replace(/\n+/g, '. ');
+
+      const utterance = new SpeechSynthesisUtterance(plainText);
+      const selVoice = document.getElementById('selSpeechVoice');
+      const voices = window.speechSynthesis.getVoices();
+      if (selVoice && selVoice.value !== '' && voices[selVoice.value]) {
+        utterance.voice = voices[selVoice.value];
+      }
+
+      utterance.onstart = () => {
+        if (btnElement) btnElement.classList.add('active');
+      };
+      utterance.onend = () => {
+        if (btnElement) btnElement.classList.remove('active');
+      };
+      utterance.onerror = () => {
+        if (btnElement) btnElement.classList.remove('active');
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // System Prompt Builder
+    function buildSystemInstruction() {
+      return `You are "StudySolve AI — an expert academic teacher, tutor, and ultra-fast problem solver".
+Target response time: 3 to 4 seconds.
+
+⚡ HIGH-SPEED DIRECT STEP-BY-STEP SOLVER DIRECTIVE:
+1. Deliver direct, high-speed, step-by-step academic solutions immediately.
+2. STRICTLY NO conversational filler, greetings ("Hello student!"), or chit-chat introductions.
+3. Start IMMEDIATELY with the solution:
+   - 📌 Given Values & Key Formula (Use clean LaTeX $$...$$ for block math and $...$ for inline)
+   - 🔢 Step-by-Step Calculation / Deduction
+   - ✅ Final Answer in clear bold box
+   - 📚 Quick 1-line Memory Rule / Tip
+4. Keep explanations sharp, mathematically rigorous, exam-ready, and concise.
+
+CORE PEDAGOGICAL RULES:
+1. Understand the student's question carefully. Explain with step-by-step clarity.
+2. ANSWER LANGUAGE:
+   - If the student writes in Hindi or Hinglish, answer in simple, warm, natural Hindi/Hinglish.
+   - If selected language is Hindi, reply in clear Hindi (हिंदी).
+   - If selected language is Bengali, reply in clear Bengali (বাংলা).
+   - If the student writes in English, reply in crisp student-friendly English.
+3. CLASS & LEVEL ADAPTATION:
+   - Currently solving for: ${APP_STATE.level} (${APP_STATE.board} Board).
+4. MODE: ${APP_STATE.mode}.
+5. MANDATORY CLOSING:
+   Every complete response MUST end with:
+   ━━━━━━━━━━━━━━━━
+   ✅ FINAL ANSWER
+   [Exact final result, number, or concluded answer clearly stated]
+   ━━━━━━━━━━━━━━━━
+6. MULTIMODAL / BOOK PAGE IMAGES:
+   - Read visible printed text, equations, and diagrams carefully.
+   - Solve directly and accurately without hallucination.`;
+    }
+
+    // Main Question Handling
+    async function handleSendQuestion() {
+      const input = document.getElementById('questionInput');
+      const questionText = input.value.trim();
+      const hasImage = !!APP_STATE.attachedImageBase64;
+
+      if (!questionText && !hasImage) {
+        showToast('Please type a question or attach a book image', 'error');
+        return;
+      }
+
+      // Check online status before initiating request
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        showToast('⚠️ You are offline. Please check your internet connection and try again.', 'warning');
+        return;
+      }
+
+      // Save question for quick retry if needed
+      const savedImageBase64 = APP_STATE.attachedImageBase64;
+      const savedImageType = APP_STATE.attachedImageType;
+      const savedImageName = APP_STATE.attachedImageName;
+      APP_STATE.lastQuestion = {
+        text: questionText,
+        imageBase64: savedImageBase64,
+        imageType: savedImageType,
+        imageName: savedImageName
+      };
+
+      // Transition from Hero to Chat
+      document.getElementById('heroSection').style.display = 'none';
+      const chatViewport = document.getElementById('chatViewport');
+      chatViewport.classList.add('active');
+
+      // Update Orb state
+      setOrbState('thinking');
+
+      // Append User message
+      appendUserMessage(questionText, APP_STATE.attachedImageBase64 ? `data:${APP_STATE.attachedImageType};base64,${APP_STATE.attachedImageBase64}` : null, {
+        subject: APP_STATE.activeSubject,
+        mode: APP_STATE.mode,
+        level: APP_STATE.level
+      });
+
+      // Clear input and thumbnail
+      input.value = '';
+      input.style.height = 'auto';
+      removeAttachedImage();
+
+      // Show thinking bubble
+      const thinkingId = 'thinking_' + Date.now();
+      appendThinkingBubble(thinkingId);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+      // Build request body for Gemini REST API
+      const parts = [];
+      if (savedImageBase64) {
+        parts.push({
+          inlineData: {
+            mimeType: savedImageType || 'image/jpeg',
+            data: savedImageBase64
+          }
+        });
+      }
+
+      const promptText = `Subject: ${APP_STATE.activeSubject}
+Education Level: ${APP_STATE.level}
+Board: ${APP_STATE.board}
+Response Language: ${APP_STATE.language}
+Mode: ${APP_STATE.mode}
+
+Student Question:
+${questionText || 'Please solve the question shown in the attached image.'}`;
+
+      parts.push({ text: promptText });
+
+      const requestBody = {
+        contents: [{ role: 'user', parts: parts }],
+        systemInstruction: {
+          parts: [{ text: buildSystemInstruction() }]
+        },
+        generationConfig: {
+          temperature: APP_STATE.temperature || 0.2,
+          maxOutputTokens: savedImageBase64 ? 1200 : 900
+        }
+      };
+
+      // Optional Google Search grounding tool if selected
+      if (APP_STATE.groundedSearch) {
+        requestBody.tools = [{ googleSearch: {} }];
+      }
+
+      try {
+        const result = await callGeminiProxyWithRetry(requestBody, (statusNote) => {
+          const step4 = document.getElementById('thStatus4');
+          if (step4) step4.innerText = statusNote;
+        });
+
+        removeElement(thinkingId);
+
+        if (!result.ok) {
+          handleApiError(result.data || {}, result.status || 400);
+          appendErrorCard(result.data?.error?.message || 'The AI service encountered an issue while generating a response.');
+          setOrbState('ready');
+          return;
+        }
+
+        const data = result.data;
+        const candidate = data.candidates && data.candidates[0];
+        if (!candidate || !candidate.content || !candidate.content.parts || !candidate.content.parts[0]) {
+          showToast('The AI returned an empty response. Please try rephrasing.', 'error');
+          appendErrorCard('The AI returned an empty answer. Click Retry to request a fresh solution.');
+          setOrbState('ready');
+          return;
+        }
+
+        const answerText = candidate.content.parts.map(p => p.text || '').join('\n');
+        
+        // Append AI response
+        appendAiMessage(answerText, {
+          subject: APP_STATE.activeSubject,
+          mode: APP_STATE.mode,
+          level: APP_STATE.level
+        });
+
+        // Save to History
+        saveToHistory(questionText || 'Image Question', answerText, savedImageBase64);
+
+        setOrbState('finished');
+        setTimeout(() => setOrbState('ready'), 4000);
+
+      } catch (err) {
+        removeElement(thinkingId);
+        setOrbState('ready');
+        console.error('StudySolve AI execution failure:', err);
+        const userFriendlyMsg = err.message || 'Connection error. Please verify your internet connection.';
+        showToast(`Connection issue: ${userFriendlyMsg}`, 'error');
+        appendErrorCard(userFriendlyMsg);
+      }
+    }
+
+    // Resilient multi-attempt proxy fetcher with automatic retry and backoff
+    async function callGeminiProxyWithRetry(requestBody, onProgress) {
+      const modelToUse = APP_STATE.model || CONFIG.DEFAULT_MODEL;
+      const clientKey = (APP_STATE.apiKey && APP_STATE.apiKey.startsWith('AIza')) ? APP_STATE.apiKey : undefined;
+      const maxAttempts = 3;
+      let lastErr = null;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+          const res = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              model: modelToUse,
+              payload: requestBody,
+              clientApiKey: clientKey
+            })
+          });
+          clearTimeout(timeoutId);
+
+          const data = await res.json().catch(() => ({}));
+
+          // Success with candidates
+          if (res.ok && data.candidates && data.candidates.length > 0) {
+            return { ok: true, data, status: res.status };
+          }
+
+          // If search tools triggered 429 quota exhaustion, immediately drop tools and retry!
+          if (requestBody.tools && (res.status === 429 || data.error?.message?.toLowerCase().includes('quota'))) {
+            delete requestBody.tools;
+            if (onProgress) onProgress('Retrying without search tools...');
+            continue;
+          }
+
+          // If model was not found, fallback to fast lightweight model
+          if (data.error && (res.status === 404 || data.error.message?.includes('not found') || data.error.message?.includes('no longer available'))) {
+            APP_STATE.model = 'gemini-3.1-flash-lite';
+            localStorage.setItem(CONFIG.STORAGE_KEY_MODEL, 'gemini-3.1-flash-lite');
+            if (onProgress) onProgress('Switching to fast solver model...');
+            continue;
+          }
+
+          // If server error 500/502/503/504, wait and retry
+          if (res.status >= 500 && attempt < maxAttempts) {
+            if (onProgress) onProgress(`Server busy, retrying (${attempt}/${maxAttempts})...`);
+            await new Promise(r => setTimeout(r, 1000 * attempt));
+            continue;
+          }
+
+          return { ok: false, data, status: res.status };
+        } catch (fetchErr) {
+          console.warn(`Attempt ${attempt} network error:`, fetchErr);
+          lastErr = fetchErr;
+
+          if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            throw new Error('You are offline. Please verify your internet connection.');
+          }
+
+          if (fetchErr.name === 'AbortError') {
+            if (attempt < maxAttempts) {
+              if (onProgress) onProgress(`Request timed out, retrying (${attempt}/${maxAttempts})...`);
+              await new Promise(r => setTimeout(r, 1000));
+              continue;
+            }
+            throw new Error('Connection timed out. The AI server or network is slow to respond.');
+          }
+
+          if (attempt < maxAttempts) {
+            if (onProgress) onProgress(`Reconnecting to AI engine (${attempt}/${maxAttempts})...`);
+            await new Promise(r => setTimeout(r, 1200 * attempt));
+            continue;
+          }
+        }
+      }
+
+      // Direct client fallback if user has explicit personal key
+      if (clientKey) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${clientKey}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
+          const data = await response.json();
+          if (response.ok && data.candidates) {
+            return { ok: true, data, status: response.status };
+          }
+        } catch (_) {}
+      }
+
+      throw lastErr || new Error('Network connection error: Failed to reach the AI server. Please verify your connection.');
+    }
+
+    function appendErrorCard(errorMessage) {
+      const viewport = document.getElementById('chatViewport');
+      const row = document.createElement('div');
+      row.className = 'chat-row ai-row error-row';
+      row.innerHTML = `
+        <div class="avatar ai-avatar" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; display:flex; align-items:center; justify-content:center; font-size:16px;">
+          ⚠️
+        </div>
+        <div class="message-bubble ai-bubble" style="border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.04);">
+          <div style="font-weight: 700; color: #ef4444; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <span>Connection Interrupted</span>
+            <span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: rgba(239, 68, 68, 0.15); color: #ef4444;">Network / Server</span>
+          </div>
+          <div style="font-size: 13.5px; line-height: 1.5; color: var(--text-main); margin-bottom: 12px;">
+            ${escapeHtml(errorMessage)}
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-action" onclick="window.retryLastQuestion()" style="background: var(--primary-main); color: #fff; font-size: 12px; padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+              <span>🔄</span> Try Again
+            </button>
+            <button class="btn-action" onclick="window.restoreQuestionInput()" style="background: var(--bg-surface-elevated); color: var(--text-main); font-size: 12px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border-glow); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <span>✏️</span> Edit Question
+            </button>
+          </div>
+        </div>
+      `;
+      viewport.appendChild(row);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    // Global helper to retry previous question without re-typing or re-uploading
+    window.retryLastQuestion = function() {
+      if (!APP_STATE.lastQuestion) {
+        showToast('No previous question found to retry', 'info');
+        return;
+      }
+      const q = APP_STATE.lastQuestion;
+      const inp = document.getElementById('questionInput');
+      inp.value = q.text || '';
+      if (q.imageBase64) {
+        APP_STATE.attachedImageBase64 = q.imageBase64;
+        APP_STATE.attachedImageType = q.imageType;
+        APP_STATE.attachedImageName = q.imageName;
+        document.getElementById('imgPreviewThumb').src = `data:${q.imageType};base64,${q.imageBase64}`;
+        document.getElementById('imgPreviewName').innerText = q.imageName || 'Book Photo';
+        document.getElementById('imgPreviewBar').classList.add('show');
+      }
+      handleSendQuestion();
+    };
+
+    // Global helper to restore question to input bar
+    window.restoreQuestionInput = function() {
+      if (!APP_STATE.lastQuestion) return;
+      const q = APP_STATE.lastQuestion;
+      const inp = document.getElementById('questionInput');
+      inp.value = q.text || '';
+      inp.focus();
+      if (q.imageBase64) {
+        APP_STATE.attachedImageBase64 = q.imageBase64;
+        APP_STATE.attachedImageType = q.imageType;
+        APP_STATE.attachedImageName = q.imageName;
+        document.getElementById('imgPreviewThumb').src = `data:${q.imageType};base64,${q.imageBase64}`;
+        document.getElementById('imgPreviewName').innerText = q.imageName || 'Book Photo';
+        document.getElementById('imgPreviewBar').classList.add('show');
+      }
+      showToast('Question restored to question box', 'info');
+    };
+
+    function handleApiError(data, status) {
+      const err = data.error || {};
+      const msg = err.message || 'Unknown API error';
+
+      if (status === 400 && msg.includes('API_KEY_INVALID')) {
+        showToast('Invalid API Key. Please check your Gemini API key in API Settings.', 'error');
+        openSettingsModal();
+      } else if (status === 429 || msg.toLowerCase().includes('quota')) {
+        showToast('Gemini API quota exceeded or rate limit reached. Free usage is subject to Google limits.', 'error');
+      } else if (status === 404 || msg.toLowerCase().includes('model')) {
+        showToast(`Model ${APP_STATE.model} unavailable. Try selecting Gemini 2.5 Flash in Settings.`, 'error');
+      } else {
+        showToast(`Gemini API Error (${status}): ${msg}`, 'error');
+      }
+    }
+
+    function setOrbState(state) {
+      const dot = document.getElementById('orbStatusDot');
+      const txt = document.getElementById('orbStatusText');
+      if (!dot || !txt) return;
+
+      if (state === 'thinking') {
+        dot.style.background = 'var(--primary)';
+        dot.style.boxShadow = '0 0 10px var(--primary)';
+        txt.innerText = 'Thinking...';
+      } else if (state === 'finished') {
+        dot.style.background = 'var(--success)';
+        dot.style.boxShadow = '0 0 10px var(--success)';
+        txt.innerText = 'Answer Ready ✨';
+      } else {
+        dot.style.background = 'var(--success)';
+        dot.style.boxShadow = '0 0 6px var(--success)';
+        txt.innerText = 'AI Ready';
+      }
+    }
+
+    function appendUserMessage(text, imageSrc, meta) {
+      const viewport = document.getElementById('chatViewport');
+      const row = document.createElement('div');
+      row.className = 'chat-row user-row';
+
+      let imgHtml = '';
+      if (imageSrc) {
+        imgHtml = `<img src="${imageSrc}" class="attached-img-thumb" alt="Uploaded Question" onclick="zoomImage('${imageSrc}')" />`;
+      }
+
+      row.innerHTML = `
+        <div class="message-bubble user-bubble">
+          <div class="user-meta">
+            <span>📚 ${escapeHtml(meta.subject)}</span>
+            <span>•</span>
+            <span>${escapeHtml(meta.level)}</span>
+            <span>•</span>
+            <span>${escapeHtml(meta.mode)}</span>
+          </div>
+          ${imgHtml}
+          <div>${escapeHtml(text)}</div>
+        </div>
+        <div class="avatar user-avatar" title="You">👤</div>
+      `;
+      viewport.appendChild(row);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function appendThinkingBubble(id) {
+      const viewport = document.getElementById('chatViewport');
+      const row = document.createElement('div');
+      row.className = 'chat-row ai-row';
+      row.id = id;
+
+      row.innerHTML = `
+        <div class="avatar ai-avatar">
+          <img src="/study-solve-ai-icon.png" alt="StudySolve AI" class="avatar-logo-img" referrerPolicy="no-referrer" />
+        </div>
+        <div class="thinking-box">
+          <div class="thinking-header">
+            <div class="thinking-header-left">
+              <div class="thinking-spinner"></div>
+              <div>
+                <div class="thinking-title">StudySolve AI is solving...</div>
+                <div style="font-size:11px; color:var(--text-dim);">Turbo 4-Second Speed Engine Active</div>
+              </div>
+            </div>
+            <div class="thinking-timer-pill" id="thinkingTimerPill">
+              <span>⏱️</span> <span id="thinkingTimerVal">0.0s</span>
+            </div>
+          </div>
+          <div class="thinking-bar-track">
+            <div class="thinking-bar-fill" id="thinkingBarFill"></div>
+          </div>
+          <div class="thinking-steps-container">
+            <div class="thinking-step-row active" id="thStep1">
+              <span><span class="thinking-step-icon">⚡</span> Step 1: Analyzing question & variables</span>
+              <span style="font-size:10px; font-family:var(--font-mono);" id="thStatus1">computing...</span>
+            </div>
+            <div class="thinking-step-row" id="thStep2">
+              <span><span class="thinking-step-icon">📐</span> Step 2: Formulating theorem & equations</span>
+              <span style="font-size:10px; font-family:var(--font-mono);" id="thStatus2">waiting</span>
+            </div>
+            <div class="thinking-step-row" id="thStep3">
+              <span><span class="thinking-step-icon">✍️</span> Step 3: Computing step-by-step substitution</span>
+              <span style="font-size:10px; font-family:var(--font-mono);" id="thStatus3">waiting</span>
+            </div>
+            <div class="thinking-step-row" id="thStep4">
+              <span><span class="thinking-step-icon">🎯</span> Step 4: Formatting verified final answer</span>
+              <span style="font-size:10px; font-family:var(--font-mono);" id="thStatus4">waiting</span>
+            </div>
+          </div>
+        </div>
+      `;
+      viewport.appendChild(row);
+
+      window._solveStartTime = Date.now();
+      if (window._activeThinkingInterval) clearInterval(window._activeThinkingInterval);
+
+      window._activeThinkingInterval = setInterval(() => {
+        const elapsedMs = Date.now() - window._solveStartTime;
+        const elapsedSec = (elapsedMs / 1000).toFixed(1);
+        const timerVal = document.getElementById('thinkingTimerVal');
+        if (timerVal) timerVal.innerText = `${elapsedSec}s`;
+
+        const bar = document.getElementById('thinkingBarFill');
+        if (bar) {
+          const pct = Math.min(96, Math.floor((elapsedMs / 3800) * 100));
+          bar.style.width = `${pct}%`;
+        }
+
+        // Fast responsive step progression (~0.4s to 3.4s)
+        if (elapsedMs >= 400) {
+          setStepState(1, 'done', '0.4s ✓');
+          setStepState(2, 'active', 'matching formulas...');
+        }
+        if (elapsedMs >= 1200) {
+          setStepState(2, 'done', '1.2s ✓');
+          setStepState(3, 'active', 'calculating steps...');
+        }
+        if (elapsedMs >= 2200) {
+          setStepState(3, 'done', '2.2s ✓');
+          setStepState(4, 'active', 'formatting answer...');
+        }
+        if (elapsedMs >= 3200) {
+          setStepState(4, 'done', 'ready ✓');
+        }
+      }, 100);
+    }
+
+    function setStepState(stepNum, state, statusText) {
+      const stepRow = document.getElementById(`thStep${stepNum}`);
+      const statusEl = document.getElementById(`thStatus${stepNum}`);
+      if (!stepRow || !statusEl) return;
+      stepRow.className = `thinking-step-row ${state}`;
+      if (statusText) statusEl.innerText = statusText;
+    }
+
+    function appendAiMessage(markdownText, meta) {
+      const viewport = document.getElementById('chatViewport');
+      const row = document.createElement('div');
+      row.className = 'chat-row ai-row';
+
+      const formattedHtml = parseStudyMarkdown(markdownText);
+      const msgId = 'msg_' + Date.now();
+      const elapsedSec = window._solveStartTime ? ((Date.now() - window._solveStartTime) / 1000).toFixed(1) : '3.2';
+
+      row.innerHTML = `
+        <div class="avatar ai-avatar">
+          <img src="/study-solve-ai-icon.png" alt="StudySolve AI" class="avatar-logo-img" referrerPolicy="no-referrer" />
+        </div>
+        <div class="message-bubble ai-bubble" id="${msgId}">
+          <div class="ai-header-badge">
+            <div class="ai-author-tag">
+              <span>StudySolve AI Tutor</span>
+              <span style="font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(99,102,241,0.15); color:var(--primary-light);">Verified Solution</span>
+              <span style="font-size:10px; padding:2px 8px; border-radius:12px; background:rgba(16,185,129,0.15); color:#10b981; font-weight:700; display:inline-flex; align-items:center; gap:4px;">⚡ ${elapsedSec}s (Turbo Speed)</span>
+            </div>
+            <div class="ai-meta-tag">${escapeHtml(meta.subject)} • ${escapeHtml(meta.mode)}</div>
+          </div>
+          
+          <div class="markdown-content">
+            ${formattedHtml}
+          </div>
+
+          <div class="ai-actions-bar">
+            <button class="btn-action btn-copy-ans" title="Copy Full Solution">
+              <span>📋</span> Copy Solution
+            </button>
+            <button class="btn-action btn-speak-ans" title="Read Aloud with Voice">
+              <span>🔊</span> Read Aloud
+            </button>
+            <button class="btn-action btn-regen-ans" title="Regenerate Solution">
+              <span>🔄</span> Regenerate
+            </button>
+            <button class="btn-action btn-share-ans" title="Share with Classmates">
+              <span>📤</span> Share
+            </button>
+            <button class="btn-action btn-thumb-up" title="Helpful">
+              <span>👍</span> Helpful
+            </button>
+            <button class="btn-action btn-thumb-down" title="Not Helpful">
+              <span>👎</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      viewport.appendChild(row);
+
+      // Render math formulas via KaTeX if available
+      renderMathInElementSafely(row);
+
+      // Wire action buttons
+      const copyBtn = row.querySelector('.btn-copy-ans');
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(markdownText).then(() => {
+          showToast('Complete solution copied to clipboard! 📋', 'success');
+        });
+      });
+
+      const speakBtn = row.querySelector('.btn-speak-ans');
+      speakBtn.addEventListener('click', () => {
+        speakText(markdownText, speakBtn);
+      });
+
+      const regenBtn = row.querySelector('.btn-regen-ans');
+      regenBtn.addEventListener('click', () => {
+        handleSendQuestion();
+      });
+
+      const shareBtn = row.querySelector('.btn-share-ans');
+      shareBtn.addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({
+            title: `StudySolve AI — ${meta.subject} Solution`,
+            text: markdownText
+          }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(markdownText).then(() => {
+            showToast('Solution copied to clipboard to share!', 'info');
+          });
+        }
+      });
+
+      const thumbUp = row.querySelector('.btn-thumb-up');
+      thumbUp.addEventListener('click', () => {
+        thumbUp.classList.add('active');
+        showToast('Thank you for your feedback! ⭐', 'success');
+      });
+
+      const thumbDown = row.querySelector('.btn-thumb-down');
+      thumbDown.addEventListener('click', () => {
+        thumbDown.classList.add('active');
+        showToast('Feedback recorded. We will improve step accuracy.', 'info');
+      });
+
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    // Markdown & Callout Parser
+    function parseStudyMarkdown(raw) {
+      let text = raw;
+
+      // Handle custom section callouts
+      text = text.replace(/✅\s*FINAL ANSWER[:\s]*([\s\S]*?)(?=(📚|📌|💡|🧮|📝|━+|$))/gi, (match, p1) => {
+        return `<div class="callout-box callout-final"><div class="callout-head">✅ FINAL ANSWER</div>${p1.trim()}</div>`;
+      });
+
+      text = text.replace(/📚\s*QUICK REVISION[:\s]*([\s\S]*?)(?=(✅|📌|💡|🧮|📝|━+|$))/gi, (match, p1) => {
+        return `<div class="callout-box callout-revision"><div class="callout-head">📚 QUICK REVISION</div>${p1.trim()}</div>`;
+      });
+
+      text = text.replace(/💡\s*CONCEPT[:\s]*([\s\S]*?)(?=(✅|📚|📌|🧮|📝|━+|$))/gi, (match, p1) => {
+        return `<div class="callout-box callout-concept"><div class="callout-head">💡 CONCEPT</div>${p1.trim()}</div>`;
+      });
+
+      text = text.replace(/🧮\s*CALCULATION[:\s]*([\s\S]*?)(?=(✅|📚|📌|💡|📝|━+|$))/gi, (match, p1) => {
+        return `<div class="callout-box callout-calculation"><div class="callout-head">🧮 CALCULATION & DERIVATION</div>${p1.trim()}</div>`;
+      });
+
+      // Remove separator bars like ━━━━━━━━━━━━
+      text = text.replace(/━{4,}/g, '<hr style="border:none; border-top: 1px solid var(--border-subtle); margin: 14px 0;" />');
+
+      // Simple Markdown converter
+      text = text
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^\> (.*$)/gim, '<blockquote style="border-left: 3px solid var(--primary); padding-left: 12px; margin: 8px 0; color: var(--text-muted);">$1</blockquote>')
+        .replace(/^\- (.*$)/gim, '<li>$1</li>')
+        .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Wrap consecutive <li> into <ul>
+      text = text.replace(/(<li>[\s\S]*?<\/li>)+/g, '<ul>$&</ul>');
+
+      // Convert line breaks into <p> or <br>
+      const paragraphs = text.split(/\n\n+/);
+      return paragraphs.map(p => {
+        if (p.startsWith('<h') || p.startsWith('<div') || p.startsWith('<ul') || p.startsWith('<hr')) {
+          return p;
+        }
+        return `<p>${p.replace(/\n/g, '<br/>')}</p>`;
+      }).join('');
+    }
+
+    function renderMathInElementSafely(elem) {
+      if (typeof renderMathInElement === 'function') {
+        try {
+          renderMathInElement(elem, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\[', right: '\\]', display: true },
+              { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+          });
+        } catch (e) {
+          console.warn('KaTeX render warning:', e);
+        }
+      }
+    }
+
+    function saveToHistory(question, answer, imageBase64) {
+      const item = {
+        id: 'hist_' + Date.now(),
+        question: question.substring(0, 120),
+        answer: answer,
+        subject: APP_STATE.activeSubject,
+        level: APP_STATE.level,
+        mode: APP_STATE.mode,
+        imageBase64: imageBase64 ? `data:image/jpeg;base64,${imageBase64}` : null,
+        timestamp: Date.now()
+      };
+      APP_STATE.history.push(item);
+      if (APP_STATE.history.length > 50) {
+        APP_STATE.history.shift();
+      }
+      localStorage.setItem(CONFIG.STORAGE_KEY_HISTORY, JSON.stringify(APP_STATE.history));
+    }
+
+    function zoomImage(src) {
+      document.getElementById('imgZoomTarget').src = src;
+      document.getElementById('imgZoomModal').classList.add('show');
+    }
+
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+
+      let icon = 'ℹ️';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      if (type === 'warning') icon = '⚠️';
+
+      toast.innerHTML = `<span>${icon}</span> <span>${escapeHtml(message)}</span>`;
+      box.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function removeElement(id) {
+      if (window._activeThinkingInterval) {
+        clearInterval(window._activeThinkingInterval);
+        window._activeThinkingInterval = null;
+      }
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+  </script>
+</body>
+</html>

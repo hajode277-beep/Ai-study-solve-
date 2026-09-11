@@ -1,0 +1,6 @@
+{
+  "name": "StudySolve AI",
+  "description": "Ask Any Question. Understand Every Answer. Premium AI study assistant for solving textbook questions, homework, exams and step-by-step solutions across all subjects.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
